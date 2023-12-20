@@ -83,7 +83,7 @@ typedef struct SDL_version
     (x)->patch = SDL_PATCHLEVEL;                    \
 }
 
-/* TODO: Remove this whole block in SDL 3 */
+/* Update to SDL 3 */
 #if SDL_MAJOR_VERSION < 3
 /**
  *  This macro turns the version numbers into a numeric value:

@@ -1909,7 +1909,7 @@ extern DECLSPEC int SDLCALL SDL_GL_LoadLibrary(const char *path);
  * - Some OpenGL drivers, on all platforms, *will* return NULL if a function
  *   isn't supported, but you can't count on this behavior. Check for
  *   extensions you use, and if you get a NULL anyway, act as if that
- *   extension wasn't available. This is probably a bug in the driver, but you
+ *   extension wasn't available. This is probably an issue in the driver, but you
  *   can code defensively for this scenario anyhow.
  * - Just because you're on Linux/Unix, don't assume you'll be using X11.
  *   Next-gen display servers are waiting to replace it, and may or may not
