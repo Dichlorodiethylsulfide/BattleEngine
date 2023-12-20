@@ -109,6 +109,8 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)BattleEngine</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -155,6 +157,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BigBattle.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BattleEngine\BattleEngine.vcxproj">
+      <Project>{d51145e5-3983-41d9-8275-dcfd7407a232}</Project>
+      <Name>BattleEngine</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
