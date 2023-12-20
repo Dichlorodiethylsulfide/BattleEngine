@@ -17,5 +17,5 @@ public:
 void BEIO::Output(BEString& BEString, const BEIOReporterSpecifier& Reporter)
 {
     std::cout << BEIOColorOutputModifier(Reporter.Code);
-    std::cout << BETime::Now() << Reporter.BEReportString << " " << BEString.Strip() << std::endl;
+    std::cout << BETime::Now() << Reporter.BEReportString << ": " << BEString.Strip() << std::endl;
 }

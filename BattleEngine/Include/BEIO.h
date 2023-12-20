@@ -30,12 +30,12 @@ struct BEIOReporterSpecifier
     const char* BEReportString;
 };
 
-#define DEFINE_REPORTER_SPECIFIER(name, color, mode) \
-    static constexpr BEIOReporterSpecifier name##Reporter = {color, mode, #mode};
+#define DEFINE_REPORTER_SPECIFIER(name, color) \
+    static constexpr BEIOReporterSpecifier name##Reporter = {color, BEIOReportMode::##name, #name};
 
-DEFINE_REPORTER_SPECIFIER(Debug, BE_FG_DEFAULT, BEIOReportMode::Debug);
-DEFINE_REPORTER_SPECIFIER(Warn, BE_FG_YELLOW, BEIOReportMode::Warning);
-DEFINE_REPORTER_SPECIFIER(Error, BE_FG_RED, BEIOReportMode::Error);
+DEFINE_REPORTER_SPECIFIER(Debug, BE_FG_DEFAULT);
+DEFINE_REPORTER_SPECIFIER(Warning, BE_FG_YELLOW);
+DEFINE_REPORTER_SPECIFIER(Error, BE_FG_RED);
 
 #define DEFINE_LOG_OUTPUT(name) \
 static void name##Output(BEString BEString) \
@@ -48,7 +48,7 @@ class BEIO
     static void Output(BEString& BEString, const BEIOReporterSpecifier& Reporter);
 public:
     DEFINE_LOG_OUTPUT(Debug)
-    DEFINE_LOG_OUTPUT(Warn)
+    DEFINE_LOG_OUTPUT(Warning)
     DEFINE_LOG_OUTPUT(Error)
 };
 
@@ -58,5 +58,5 @@ public:
 #define DEBUG(x)
 #endif
 
-#define WARN(x) BEIO::WarnOutput(x)
+#define WARN(x) BEIO::WarningOutput(x)
 #define ERROR(x) BEIO::ErrorOutput(x)
