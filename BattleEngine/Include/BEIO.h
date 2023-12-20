@@ -52,6 +52,11 @@ public:
     DEFINE_LOG_OUTPUT(Error)
 };
 
+#if _DEBUG
 #define DEBUG(x) BEIO::DebugOutput(x)
+#else
+#define DEBUG(x)
+#endif
+
 #define WARN(x) BEIO::WarnOutput(x)
 #define ERROR(x) BEIO::ErrorOutput(x)

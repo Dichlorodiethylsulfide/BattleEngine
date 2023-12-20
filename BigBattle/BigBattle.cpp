@@ -5,6 +5,8 @@
 
 int main(int argc, char* argv[])
 {
-    ERROR("Hello World!");
+    DEBUG("Hello World!");
+    // SDL Window creation goes here
+    DEBUG("Goodbye World!");
     return 0;
 }
