@@ -25,9 +25,9 @@ enum class BEIOReportMode : int
     None,
     Log,
     Debug,
+    Success,
     Warning,
     Error,
-    Success,
     All
 };
 
@@ -50,35 +50,35 @@ DEFINE_REPORTER_SPECIFIER(Success, BE_FG_GREEN);
 #define DEFINE_LOG_OUTPUT(name) \
 void name##Output(BEString BEString) \
 { \
-    BEIO::Get().Output(BEString, name##Reporter); \
+    BEConsoleIO::Get().Output(BEString, name##Reporter); \
 }
 
-class BEIO
+class BEConsoleIO
 {
-    BEIO() {}
-    BEIO(const BEIO&) = delete;
-    BEIO(BEIO&&) = delete;
-    ~BEIO() {}
+    BEConsoleIO() {}
+    BEConsoleIO(const BEConsoleIO&) = delete;
+    BEConsoleIO(BEConsoleIO&&) = delete;
+    ~BEConsoleIO() {}
     
     void Output(BEString& BEString, const BEIOReporterSpecifier& Reporter);
 public:
-    static BEIO& Get()
+    static BEConsoleIO& Get()
     {
-        static BEIO IORepoter;
+        static BEConsoleIO IORepoter;
         return IORepoter;
     }
     static void EnableLoggingForAllLevels()
     {
-        Get().ModesDisabled = BEIOReportMode::None;
+        Get().ModesUnderDisabled = BEIOReportMode::None;
     }
     // But not including this level
     static void DisableLoggingUnderLevel(BEIOReportMode Mode)
     {
-        Get().ModesDisabled = Mode;
+        Get().ModesUnderDisabled = Mode;
     }
     static void DisableAllLogging()
     {
-        Get().ModesDisabled = BEIOReportMode::All;
+        Get().ModesUnderDisabled = BEIOReportMode::All;
     }
     DEFINE_LOG_OUTPUT(Log)
     DEFINE_LOG_OUTPUT(Debug)
@@ -87,10 +87,10 @@ public:
     DEFINE_LOG_OUTPUT(Success)
 
 private:
-    BEIOReportMode ModesDisabled = BEIOReportMode::None;
+    BEIOReportMode ModesUnderDisabled = BEIOReportMode::None;
 };
 
-#define CALL_REPORTER(name, x) BEIO::Get().##name##Output(x)
+#define CALL_REPORTER(name, x) BEConsoleIO::Get().##name##Output(x)
 
 #if _DEBUG
 #define DEBUG(x) CALL_REPORTER(Debug, x)
@@ -100,5 +100,5 @@ private:
 
 #define LOG(x) CALL_REPORTER(Log, x)
 #define WARN(x) CALL_REPORTER(Warning, x)
-#define ERROR(x) CALL_REPORTER(Error, x)
+#define ERROR(x) do { CALL_REPORTER(Error, x); CALL_REPORTER(Error, __FILE__); } while(0)
 #define SUCCESS(x) CALL_REPORTER(Success, x)

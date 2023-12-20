@@ -2,6 +2,29 @@
 
 #include<ranges> // remove: for std::move
 
+#define DEFINE_BASIC_TYPE_TRAITS(template_type) \
+using ValueType = template_type; \
+using SizeType = size_t; \
+using Pointer = ValueType*; \
+using ConstPointer = const ValueType*; \
+using Ref = ValueType&; \
+using ConstRef = const ValueType&; \
+
+#define DEFINE_ITERATOR_TYPE_TRAITS(template_type) \
+using Iterator = Iter<template_type>; \
+using ConstIterator = ConstIter<template_type>; \
+using ReverseIterator = ReverseIter<template_type>; \
+using ConstReverseIterator = ConstReverseIter<template_type>;
+
+#define DEFINE_INHERITED_TYPE_TRAITS(base) \
+using Base = base; \
+using ValueType = typename Base::ValueType; \
+using SizeType = typename Base::SizeType; \
+using Pointer = typename Base::ValueType*; \
+using ConstPointer = const typename Base::ValueType*; \
+using Ref = typename Base::ValueType&; \
+using ConstRef = const typename Base::ValueType&;
+
 template<typename TType>
 struct Bad
 {
@@ -13,16 +36,199 @@ struct Bad
 };
 
 template<typename TElem>
+class ConstIter
+{
+public:
+    DEFINE_BASIC_TYPE_TRAITS(TElem)
+    
+    ConstIter() {}
+    ConstIter(Pointer Element) { current = Element; }
+    virtual ~ConstIter() { current = {}; }
+
+    static SizeType GetIteratorLength(ConstIter Begin, ConstIter End)
+    {
+        SizeType length = 0;
+        while(Begin++ != End)
+        {
+            length++;
+        }
+        return length;
+    }
+
+    // A const iterator can be safely iterated through in a 'const ConstIterator' context
+    
+    const ConstIter& operator++() const
+    {
+        ++const_cast<ConstIter*>(this)->current;
+        return *this;
+    }
+    ConstIter operator++(int) const
+    {
+        auto old = *this;
+        operator++();
+        return old;
+    }
+    const ConstIter& operator--() const
+    {
+        --current;
+        return *this;
+    }
+    ConstIter operator--(int) const
+    {
+        auto old = *this;
+        operator--();
+        return old;
+    }
+    bool operator==(const ConstIter& Other) const
+    {
+        return current == Other.current;
+    }
+    bool operator!=(const ConstIter& Other) const
+    {
+        return current != Other.current;
+    }
+    ConstRef operator*() const
+    {
+        return *current;
+    }
+private:
+    Pointer current{};
+};
+
+template<typename TElem>
+class ConstReverseIter
+{
+public:
+    DEFINE_BASIC_TYPE_TRAITS(TElem)
+
+    ConstReverseIter() {}
+    ConstReverseIter(Pointer Element) { current = Element; }
+    virtual ~ConstReverseIter() { current = {}; }
+
+    static SizeType GetIteratorLength(ConstReverseIter Begin, ConstReverseIter End)
+    {
+        SizeType length = 0;
+        while(Begin++ != End)
+        {
+            length++;
+        }
+        return length;
+    }
+
+    const ConstReverseIter& operator++() const
+    {
+        --current;
+        return *this;
+    }
+    ConstReverseIter operator++(int) const
+    {
+        auto old = *this;
+        operator--();
+        return old;
+    }
+    const ConstReverseIter& operator--() const
+    {
+        ++current;
+        return *this;
+    }
+    ConstReverseIter operator--(int) const
+    {
+        auto old = *this;
+        operator++();
+        return old;
+    }
+    bool operator==(const ConstReverseIter& Other) const
+    {
+        return current == Other.current;
+    }
+    bool operator!=(const ConstReverseIter& Other) const
+    {
+        return current != Other.current;
+    }
+    ConstRef operator*() const
+    {
+        return *current;
+    }
+private:
+    Pointer current{};
+};
+
+template<typename TElem>
+class Iter : public ConstIter<TElem>
+{
+public:
+    DEFINE_INHERITED_TYPE_TRAITS(ConstIter<TElem>)
+
+    Iter() {}
+    Iter(Pointer Element) : Base(Element) {}
+
+    Iter& operator++()
+    {
+        dynamic_cast<Base*>(this)->operator++();
+        return *this;
+    }
+    Iter operator++(int)
+    {
+        auto old = *this;
+        operator++();
+        return old;
+    }
+    Iter& operator--()
+    {
+        --Base::current;
+        return *this;
+    }
+    Iter operator--(int)
+    {
+        auto old = *this;
+        operator--();
+        return old;
+    }
+};
+
+template<typename TElem>
+class ReverseIter : public ConstReverseIter<TElem>
+{
+public:
+    DEFINE_INHERITED_TYPE_TRAITS(ConstReverseIter<TElem>)
+
+    ReverseIter() {}
+    ReverseIter(Pointer Element) : Base(Element) {}
+    
+    ReverseIter& operator++()
+    {
+        --Base::current;
+        return *this;
+    }
+    ReverseIter operator++(int)
+    {
+        auto old = *this;
+        operator--();
+        return old;
+    }
+    ReverseIter& operator--()
+    {
+        ++Base::current;
+        return *this;
+    }
+    ReverseIter operator--(int)
+    {
+        auto old = *this;
+        operator++();
+        return old;
+    }
+};
+
+#define FOREACH_ITER iter
+#define FOREACH(x) for(auto FOREACH_ITER = (x).Begin(); FOREACH_ITER != (x).End(); ++FOREACH_ITER)
+#define FOREACH_VALUE *FOREACH_ITER
+
+template<typename TElem>
 class BEArray
 {
 public:
-    using Base = BEArray;
-    using SizeType = size_t;
-    using ValueType = TElem;
-    using Pointer = ValueType*;
-    using ConstPointer = const ValueType*;
-    using Ref = ValueType&;
-    using ConstRef = const ValueType&;
+    DEFINE_BASIC_TYPE_TRAITS(TElem)
+    DEFINE_ITERATOR_TYPE_TRAITS(TElem)
 
     static void Copy(Pointer Destination, ConstPointer Source, SizeType Length)
     {
@@ -149,8 +355,40 @@ public:
     {
         if(Index < GetLength())
         {
-            Base::Move(&m_elements[Index], &m_elements[Index+1], GetLength() - Index - 1);
+            Move(&m_elements[Index], &m_elements[Index+1], GetLength() - Index - 1);
         }
+    }
+    Iterator Begin()
+    {
+        return m_elements;
+    }
+    ReverseIterator RBegin()
+    {
+        return m_elements;
+    }
+    ConstReverseIterator RBegin() const
+    {
+        return m_elements;
+    }
+    ConstIterator Begin() const
+    {
+        return m_elements;
+    }
+    Iterator End()
+    {
+        return &m_elements[m_capacity];
+    }
+    ReverseIterator REnd()
+    {
+        return &m_elements[m_capacity]; 
+    }
+    ConstReverseIterator REnd() const
+    {
+        return &m_elements[m_capacity];
+    }
+    ConstIterator End() const
+    {
+        return &m_elements[m_capacity];
     }
     //
     ConstRef operator[](SizeType Index) const

@@ -1,7 +1,7 @@
 
 // Based on Touhou Big Big Battle
 
-#include <BEIO.h>
+#include <BEConsoleIO.h>
 
 int main(int argc, char* argv[])
 {

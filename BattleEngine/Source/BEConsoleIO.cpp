@@ -1,4 +1,4 @@
-﻿#include "BEIO.h"
+﻿#include "BEConsoleIO.h"
 #include "BETime.h"
 
 #include<iostream>
@@ -8,15 +8,17 @@ class BEIOColorOutputModifier {
     BEIOColourCode code;
 public:
     BEIOColorOutputModifier(BEIOColourCode pCode) : code(pCode) {}
+    
     friend std::ostream&
-    operator<<(std::ostream& os, const BEIOColorOutputModifier& mod) {
+    operator<<(std::ostream& os, const BEIOColorOutputModifier& mod)
+    {
         return os << "\033[" << mod.code << "m";
     }
 };
 
-void BEIO::Output(BEString& BEString, const BEIOReporterSpecifier& Reporter)
+void BEConsoleIO::Output(BEString& BEString, const BEIOReporterSpecifier& Reporter)
 {
-    if(Reporter.Mode < Get().ModesDisabled)
+    if(Reporter.Mode < Get().ModesUnderDisabled)
     {
         return;
     }

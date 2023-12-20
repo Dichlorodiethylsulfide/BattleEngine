@@ -3,7 +3,8 @@
 #include<ctime>
 #include<chrono>
 
-BETime::BETimeContainer::BETimeContainer(long long CurrentTime): m_currentTime(CurrentTime)
+BETime::BETimeContainer::BETimeContainer(long long CurrentTime)
+    : m_currentTime(CurrentTime)
 {
     if(const auto error = ctime_s(m_currentTimeBuffer.GetBuffer(), BETimeBufferSize, &m_currentTime); !error)
     {

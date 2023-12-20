@@ -5,11 +5,7 @@ template<typename TElem>
 class BEVector : public BEArray<TElem>
 {
 public:
-    using ValueType = TElem;
-    using Base = BEArray<ValueType>;
-    using SizeType = typename Base::SizeType;
-    using Pointer = typename Base::Pointer;
-    using ConstPointer = typename Base::ConstPointer;
+    DEFINE_INHERITED_TYPE_TRAITS(BEArray<TElem>)
 
     BEVector(SizeType Size) : Base(Size)
     {
@@ -17,10 +13,12 @@ public:
     
     BEVector(Pointer Elements, SizeType Size) : Base(Elements, Size)
     {
+        m_length = Size;
     }
     
     BEVector(ConstPointer Elements, SizeType Size) : Base(Elements, Size)
     {
+        m_length = Size;
     }
 
     SizeType GetLength() const override

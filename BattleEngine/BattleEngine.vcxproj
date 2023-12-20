@@ -231,7 +231,7 @@
       <SDLCheck>true</SDLCheck>
       <LibCompiled>true</LibCompiled>
     </ClCompile>
-    <ClCompile Include="Source\BEIO.cpp">
+    <ClCompile Include="Source\BEConsoleIO.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <Optimization>Disabled</Optimization>
@@ -527,7 +527,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\BEArray.h" />
-    <ClInclude Include="Include\BEIO.h" />
+    <ClInclude Include="Include\BEConsoleIO.h" />
     <ClInclude Include="Include\BEString.h" />
     <ClInclude Include="Include\BETime.h" />
     <ClInclude Include="Include\BEVector.h" />

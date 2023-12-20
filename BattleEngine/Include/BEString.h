@@ -6,13 +6,16 @@
 enum class BECharacterEncoding : int
 {
     UTF8 = 1,
-    Unicode = 2
+    Unicode = 2, // UTF16
+    UTF32 = 4
 };
 
 #define UNICODE_AS_DEFAULT 0
 
 template<BECharacterEncoding Encoding>
-using GetCharEncodingType = std::conditional_t<static_cast<int>(Encoding) == 1, char, wchar_t>;
+using GetCharEncodingType =
+    std::conditional_t<static_cast<int>(Encoding) == 1, char,
+    std::conditional_t<static_cast<int>(Encoding) == 2, wchar_t, int>>;
 
 template<BECharacterEncoding Encoding>
 static size_t GetStringLength(const GetCharEncodingType<Encoding>* Characters)
@@ -36,14 +39,18 @@ template<BECharacterEncoding Encoding>
 class BERawString : public BEVector<GetCharEncodingType<Encoding>>
 {
 public:
-    using ValueType = GetCharEncodingType<Encoding>;
-    using Base = BEVector<ValueType>;
-    using SizeType = typename Base::SizeType;
-    using Pointer = typename Base::Pointer;
-    using ConstPointer = typename Base::ConstPointer;
+    DEFINE_INHERITED_TYPE_TRAITS(BEVector<GetCharEncodingType<Encoding>>)
+
+    static_assert(sizeof(ValueType) < sizeof(SizeType), "You cannot use a char ValueType with size greater or equal to the SizeType size");
     
     BERawString(SizeType Capacity) : Base(Capacity)
     {
+    }
+
+    BERawString(ValueType SingleCharacter) : Base(2)
+    {
+        Base::m_elements[0] = SingleCharacter;
+        Base::m_elements[1] = '\0';
     }
 
     BERawString(ConstPointer String) : Base(String, GetStringLength<Encoding>(String))
@@ -81,7 +88,7 @@ public:
 
 private:
     friend struct BETime;
-    friend class BEIO;
+    friend class BEConsoleIO;
     friend class BETimeContainer;
 };
 
