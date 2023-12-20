@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include<ranges> // remove: for std::move
+#include <initializer_list>
 
 #define DEFINE_BASIC_TYPE_TRAITS(template_type) \
 using ValueType = template_type; \
@@ -9,6 +10,7 @@ using Pointer = ValueType*; \
 using ConstPointer = const ValueType*; \
 using Ref = ValueType&; \
 using ConstRef = const ValueType&; \
+using MovedType = ValueType&&;
 
 #define DEFINE_ITERATOR_TYPE_TRAITS(template_type) \
 using Iterator = Iter<template_type>; \
@@ -23,7 +25,8 @@ using SizeType = typename Base::SizeType; \
 using Pointer = typename Base::ValueType*; \
 using ConstPointer = const typename Base::ValueType*; \
 using Ref = typename Base::ValueType&; \
-using ConstRef = const typename Base::ValueType&;
+using ConstRef = const typename Base::ValueType&; \
+using MovedType = typename Base::MovedType;
 
 template<typename TType>
 struct Bad
@@ -261,6 +264,19 @@ public:
         return new ValueType[Size];
     }
 
+    static void Reallocate(Pointer& Elements, SizeType& OldSize, SizeType NewSize)
+    {
+        if(NewSize <= OldSize)
+        {
+            return;
+        }
+        auto* NewElements = Allocate(NewSize);
+        Move(NewElements, Elements, OldSize);
+        Free(Elements, OldSize);
+        OldSize = NewSize;
+        Elements = NewElements;
+    }
+
     static inline bool IsObjectEqual(ConstPointer Elements, ConstPointer OtherElements)
     {
         return Elements == OtherElements;
@@ -299,6 +315,15 @@ public:
     BEArray(BEArray&& Other) noexcept
     {
         *this = std::move(Other);
+    }
+    BEArray(std::initializer_list<ValueType> init_list)
+        : BEArray(init_list.size())
+    {
+        SizeType i = 0;
+        for(auto& elem : init_list)
+        {
+            m_elements[i++] = std::move(elem);
+        }
     }
     virtual ~BEArray()
     {
@@ -343,6 +368,10 @@ public:
         }
         return *Bad<ValueType>::GetBadPointer();
     }
+    void Resize(SizeType NewSize)
+    {
+        Reallocate(m_elements, m_capacity, NewSize);
+    }
     Ref Front()
     {
         return m_elements[0];
@@ -376,19 +405,19 @@ public:
     }
     Iterator End()
     {
-        return &m_elements[m_capacity];
+        return &m_elements[GetLength()];
     }
     ReverseIterator REnd()
     {
-        return &m_elements[m_capacity]; 
+        return &m_elements[GetLength()]; 
     }
     ConstReverseIterator REnd() const
     {
-        return &m_elements[m_capacity];
+        return &m_elements[GetLength()];
     }
     ConstIterator End() const
     {
-        return &m_elements[m_capacity];
+        return &m_elements[GetLength()];
     }
     //
     ConstRef operator[](SizeType Index) const
@@ -404,6 +433,10 @@ public:
         return AsNonConst().Back();
     }
     virtual SizeType GetLength() const
+    {
+        return m_capacity;
+    }
+    SizeType GetCapacity() const
     {
         return m_capacity;
     }

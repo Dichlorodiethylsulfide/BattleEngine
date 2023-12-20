@@ -2,6 +2,7 @@
 
 #include "BEVector.h"
 #include <ostream>
+#include <string>
 
 enum class BECharacterEncoding : int
 {
@@ -72,6 +73,32 @@ public:
         return GetStringLength<Encoding>(Base::m_elements);
     }
 
+    void PushBack(ConstRef Element) override
+    {
+        PushBack(std::move(std::remove_reference_t<ValueType>(Element)));
+    }
+    
+    void PushBack(MovedType Element) override
+    {
+        SizeType length = GetLength() - 1;
+        if(length + 2 < Base::GetCapacity())
+        {
+            Base::m_elements[length++] = std::move(Element);
+            Base::m_elements[length] = '\0';
+        }
+        else
+        {
+            Base::Resize(Base::GetCapacity() * 2);
+            PushBack(std::move(Element));
+        }
+    }
+
+    void PopBack() override
+    {
+        SizeType length = GetLength() - 2;
+        Base::m_elements[length] = '\0';
+    }
+
     BERawString& Strip()
     {
         for(SizeType i = 0; i < GetLength(); ++i)
@@ -82,6 +109,13 @@ public:
             }
         }
         return *this;
+    }
+
+    template<typename TNonElemType>
+    static BERawString ToString(TNonElemType&& Value)
+    {
+        static_assert(!std::is_integral_v<TNonElemType>, "Must be an integral type");
+        return std::to_string(Value).c_str();
     }
     
     static constexpr SizeType GetCharEncodingSize() { return sizeof(ValueType); }

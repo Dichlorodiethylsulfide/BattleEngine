@@ -48,9 +48,18 @@ DEFINE_REPORTER_SPECIFIER(Error, BE_FG_RED);
 DEFINE_REPORTER_SPECIFIER(Success, BE_FG_GREEN);
 
 #define DEFINE_LOG_OUTPUT(name) \
-void name##Output(BEString BEString) \
+template<typename TElem> \
+void name##Output(TElem BEValue) \
 { \
-    BEConsoleIO::Get().Output(BEString, name##Reporter); \
+    if constexpr(std::is_integral_v<TElem> && !std::is_same_v<::BEString::ValueType, TElem>) \
+    {\
+        auto BEString = ::BEString::ToString(BEValue);\
+        BEConsoleIO::Get().Output(BEString, name##Reporter); \
+    }\
+    else \
+    {   auto BEString = ::BEString(BEValue); \
+        BEConsoleIO::Get().Output(BEString, name##Reporter); \
+    } \
 }
 
 class BEConsoleIO
