@@ -3,13 +3,16 @@
 #include<ctime>
 #include<chrono>
 
-const char* BETime::BETimeContainer::GetTimeBuffer()
+BETime::BETimeContainer::BETimeContainer(long long CurrentTime): m_currentTime(CurrentTime)
 {
     if(const auto error = ctime_s(m_currentTimeBuffer.GetBuffer(), BETimeBufferSize, &m_currentTime); !error)
     {
-        return m_currentTimeBuffer.GetBuffer();
+        m_currentTimeBuffer.Strip();
     }
-    return "";
+    else
+    {
+        m_currentTimeBuffer = "Error";
+    }
 }
 
 BETime::BETimeContainer BETime::Now()

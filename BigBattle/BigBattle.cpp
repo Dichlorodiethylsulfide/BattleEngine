@@ -5,6 +5,6 @@
 
 int main(int argc, char* argv[])
 {
-    BEIO::DebugOutput("Hello World!");
+    ERROR("Hello World!");
     return 0;
 }
