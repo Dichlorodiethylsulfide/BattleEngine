@@ -60,9 +60,11 @@ struct BETime
         BETimeKeeper(const BETimeContainer& Container)
             : BETimeContainer(Container)
         {
+            m_lastCallTime = Container.GetTime();
         }
         BETimeKeeper(const BETimeKeeper&) = default;
         BETimeKeeper SinceLastCall();
+        void UpdateToNow();
     private:
         SizeType m_lastCallTime{};
     };

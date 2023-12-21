@@ -4,7 +4,7 @@
 
 #include <SDL2/SDL_video.h>
 
-BEWindow::BEWindow(BEString WindowTitle, BEBox<int> Dimensions, int FrameRate)
+BEWindow::BEWindow(BEString WindowTitle, BEBox<int> Dimensions, unsigned int FrameRate)
 {
     if(FrameRate < 1)
     {
@@ -32,7 +32,7 @@ void BEWindow::EnterMainLoop()
     LOG("Engine loop started.");
     while(m_windowPointer)
     {
-        BETime::BETimeKeeper keeper = BETime::Now();
+        m_frameTimeKeeper = BETime::Now();
         if(m_engineLoop.IsTicking(BETickState::Running))
         {
             m_engineLoop.EngineTick();
@@ -45,11 +45,7 @@ void BEWindow::EnterMainLoop()
         {
             break;
         }
-        const auto current_millis = keeper.SinceLastCall().As<BETime::Milliseconds>();
-        if(current_millis < m_millisecondsPerFrame)
-        {
-            BETime::WaitForMilliseconds(m_millisecondsPerFrame - current_millis);
-        }
+        EnsureFrameTimeIsKept();
     }
     LOG("Engine loop ended.");
 }
@@ -59,5 +55,18 @@ BEWindow::~BEWindow()
     if(m_windowPointer)
     {
         SDL_DestroyWindow(m_windowPointer.Cast<SDL_Window>());
+    }
+}
+
+void BEWindow::EnsureFrameTimeIsKept()
+{
+    const auto current_millis = m_frameTimeKeeper.SinceLastCall().As<BETime::Milliseconds>();
+    if(current_millis < m_millisecondsPerFrame)
+    {
+        BETime::WaitForMilliseconds(m_millisecondsPerFrame - current_millis);
+    }
+    else
+    {
+        WARN("Frame time was not kept.");
     }
 }

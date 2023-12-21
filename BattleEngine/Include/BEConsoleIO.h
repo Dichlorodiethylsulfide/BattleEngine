@@ -136,3 +136,10 @@ private:
     BEConsoleIO::LineBreak(); } \
     while(0)
 #define SUCCESS(x) CALL_REPORTER(Success, x)
+
+/*template<typename FirstArgument, typename ... Arguments>
+void nibc_print(FirstArgument&& FirstArgs, Arguments&&... RestArgs)
+{
+    nibc_print(std::forward<FirstArgument>(FirstArgs), false);
+    nibc_print(std::forward<Arguments>(RestArgs)...);
+}*/

@@ -28,6 +28,11 @@ BETime::BETimeKeeper BETime::BETimeKeeper::SinceLastCall()
     return m_lastCallTime - lastCallTime;
 }
 
+void BETime::BETimeKeeper::UpdateToNow()
+{
+    *this = Now();
+}
+
 BETime::BEDisplayableTime BETime::NowAsString()
 {
     return {std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())};

@@ -203,11 +203,40 @@ public:
 #define FOREACH_VALUE *FOREACH_ITER
 
 template<typename TElem>
-class BEArray
+class BEAllocator
 {
 public:
     DEFINE_BASIC_TYPE_TRAITS(TElem)
-    DEFINE_ITERATOR_TYPE_TRAITS(TElem)
+    
+    static_assert(!std::is_const_v<TElem>, "Cannot allocate constant types");
+
+    Pointer Allocate(SizeType Count)
+    {
+        return static_cast<Pointer>(::operator new(Count * sizeof(ValueType)));
+    }
+
+    void Deallocate(Pointer& Ptr, SizeType& Size)
+    {
+        if(Ptr)
+        {
+            ::operator delete(Ptr);
+            Ptr = nullptr;
+        }
+        Size = 0;
+    }
+
+    void Reallocate(Pointer& Elements, SizeType& OldSize, SizeType NewSize)
+    {
+        if(NewSize <= OldSize)
+        {
+            return;
+        }
+        auto* NewElements = Allocate(NewSize);
+        Move(NewElements, Elements, OldSize);
+        Deallocate(Elements, OldSize);
+        OldSize = NewSize;
+        Elements = NewElements;
+    }
 
     static void Copy(Pointer Destination, ConstPointer Source, SizeType Length)
     {
@@ -224,38 +253,19 @@ public:
             Destination[i] = std::move(Source[i]);
         }
     }
+};
 
-    static void Free(Pointer& Source, SizeType& Size)
-    {
-        if(Source)
-        {
-            delete [] Source;
-            Source = nullptr;
-        }
-        Size = 0;
-    }
-
-    static Pointer Allocate(SizeType Size)
-    {
-        return new ValueType[Size];
-    }
-
-    static void Reallocate(Pointer& Elements, SizeType& OldSize, SizeType NewSize)
-    {
-        if(NewSize <= OldSize)
-        {
-            return;
-        }
-        auto* NewElements = Allocate(NewSize);
-        Move(NewElements, Elements, OldSize);
-        Free(Elements, OldSize);
-        OldSize = NewSize;
-        Elements = NewElements;
-    }
+template<typename TElem>
+class BEArray
+{
+public:
+    DEFINE_BASIC_TYPE_TRAITS(TElem)
+    DEFINE_ITERATOR_TYPE_TRAITS(TElem)
+    using Allocator = BEAllocator<ValueType>;
 
     static inline bool IsObjectEqual(ConstPointer Elements, ConstPointer OtherElements)
     {
-        return Elements == OtherElements;
+        return (Elements != nullptr && OtherElements != nullptr) && Elements == OtherElements;
     }
 
     static inline bool AreElementsArrayEqual(ConstPointer Elements, ConstPointer OtherElements, SizeType Size)
@@ -273,7 +283,7 @@ public:
     BEArray(SizeType Capacity)
         : m_capacity(!Capacity ? 1 : Capacity)
     {
-        m_elements = Allocate(Capacity);
+        m_elements = m_allocator.Allocate(Capacity);
     }
     BEArray()
     : BEArray(1)
@@ -282,7 +292,7 @@ public:
     BEArray(ConstPointer Elements, SizeType Length)
         : BEArray(Length)
     {
-        Copy(m_elements, Elements, Length);
+        Allocator::Copy(m_elements, Elements, Length);
     }
     BEArray(const BEArray& Other)
     {
@@ -298,21 +308,21 @@ public:
         SizeType i = 0;
         for(auto& elem : init_list)
         {
-            m_elements[i++] = std::move(elem);
+            m_elements[i++] = std::move(const_cast<Ref>(elem));
         }
     }
     virtual ~BEArray()
     {
-        Free(m_elements, m_capacity);
+        m_allocator.Deallocate(m_elements, m_capacity);
     }
     BEArray& operator=(const BEArray& Other)
     {
         if(!IsObjectEqual(m_elements, Other.m_elements))
         {
-            Free(m_elements, m_capacity);
+            m_allocator.Deallocate(m_elements, m_capacity);
             m_capacity = Other.m_capacity;
-            m_elements = Allocate(m_capacity);
-            Copy(m_elements, Other.m_elements, m_capacity);
+            m_elements = m_allocator.Allocate(m_capacity);
+            Allocator::Copy(m_elements, Other.m_elements, m_capacity);
         }
         return *this;
     }
@@ -320,11 +330,10 @@ public:
     {
         if(!IsObjectEqual(m_elements, Other.m_elements))
         {
-            Free(m_elements, m_capacity);
             m_capacity = Other.m_capacity;
-            m_elements = Allocate(m_capacity);
-            Move(m_elements, Other.m_elements, m_capacity);
-            Free(Other.m_elements, Other.m_capacity);
+            Other.m_capacity = 0;
+            m_elements = Other.m_elements;
+            Other.m_elements = nullptr;
         }
         return *this;
     }
@@ -346,7 +355,7 @@ public:
     }
     void Resize(SizeType NewSize)
     {
-        Reallocate(m_elements, m_capacity, NewSize);
+        m_allocator.Reallocate(m_elements, m_capacity, NewSize);
     }
     Ref Front()
     {
@@ -360,7 +369,7 @@ public:
     {
         if(Index < GetLength())
         {
-            Move(&m_elements[Index], &m_elements[Index+1], GetLength() - Index - 1);
+            Allocator::Move(&m_elements[Index], &m_elements[Index+1], GetLength() - Index - 1);
         }
     }
     Iterator Begin()
@@ -431,4 +440,6 @@ protected:
     }
     SizeType m_capacity{};
     ValueType* m_elements{};
+private:
+    Allocator m_allocator{};
 };
