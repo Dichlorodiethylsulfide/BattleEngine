@@ -4,6 +4,8 @@
 #include <BEConsoleIO.h>
 #include <BEWindow.h>
 
+#include "BETime.h"
+
 int main(int argc, char* argv[])
 {
     DEBUG("Hello World!");

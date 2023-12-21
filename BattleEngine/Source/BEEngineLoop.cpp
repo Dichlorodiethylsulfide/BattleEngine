@@ -16,3 +16,8 @@ void BECPULoop::EngineTick()
         }
     }
 }
+
+void BEGPULoop::EngineTick()
+{
+    
+}

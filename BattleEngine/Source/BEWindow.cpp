@@ -1,10 +1,16 @@
 ﻿#include "BEWindow.h"
 #include "BEConsoleIO.h"
+#include "BETime.h"
 
 #include <SDL2/SDL_video.h>
 
-BEWindow::BEWindow(BEString WindowTitle, BEBox<int> Dimensions)
+BEWindow::BEWindow(BEString WindowTitle, BEBox<int> Dimensions, int FrameRate)
 {
+    if(FrameRate < 1)
+    {
+        ERROR("The frame rate was either zero or negative.");
+        return;
+    }
     if(!Dimensions.IsValid())
     {
         ERROR("The dimensions for the window were invalid, the window will not be created.");
@@ -13,6 +19,7 @@ BEWindow::BEWindow(BEString WindowTitle, BEBox<int> Dimensions)
     m_windowTitle = WindowTitle;
     m_windowDimensions = Dimensions;
     m_windowPointer = SDL_CreateWindow(m_windowTitle, Dimensions.TopLeft.X, Dimensions.TopLeft.Y, Dimensions.Dimensions.X, Dimensions.Dimensions.Y, SDL_WINDOW_SHOWN);
+    m_millisecondsPerFrame = 1000 / FrameRate;
 }
 
 void BEWindow::EnterMainLoop()
@@ -25,6 +32,7 @@ void BEWindow::EnterMainLoop()
     LOG("Engine loop started.");
     while(m_windowPointer)
     {
+        BETime::BETimeKeeper keeper = BETime::Now();
         if(m_engineLoop.IsTicking(BETickState::Running))
         {
             m_engineLoop.EngineTick();
@@ -32,6 +40,15 @@ void BEWindow::EnterMainLoop()
         if(m_renderLoop.IsTicking(BETickState::Running))
         {
             m_renderLoop.EngineTick();
+        }
+        if(m_engineLoop.IsTicking(BETickState::Stopped))
+        {
+            break;
+        }
+        const auto current_millis = keeper.SinceLastCall().As<BETime::Milliseconds>();
+        if(current_millis < m_millisecondsPerFrame)
+        {
+            BETime::WaitForMilliseconds(m_millisecondsPerFrame - current_millis);
         }
     }
     LOG("Engine loop ended.");

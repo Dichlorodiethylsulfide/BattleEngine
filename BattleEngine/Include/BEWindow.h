@@ -6,7 +6,7 @@
 class BEWindow
 {
 public:
-    BEWindow(BEString WindowTitle, BEBox<int> Dimensions);
+    BEWindow(BEString WindowTitle, BEBox<int> Dimensions, int FrameRate = 60);
     void EnterMainLoop();
     ~BEWindow();
 private:
@@ -15,4 +15,5 @@ private:
     External m_windowPointer;
     BECPULoop m_engineLoop{};
     BEGPULoop m_renderLoop{};
+    int m_millisecondsPerFrame{};
 };

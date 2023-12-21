@@ -51,7 +51,7 @@ DEFINE_REPORTER_SPECIFIER(Success, BE_FG_GREEN);
 template<typename TElem> \
 void name##Output(TElem BEValue) \
 { \
-    if constexpr(std::is_integral_v<TElem> && !std::is_same_v<::BEString::ValueType, TElem>) \
+    if constexpr((std::is_integral_v<TElem> || std::is_floating_point_v<TElem>) && !std::is_same_v<::BEString::ValueType, TElem>) \
     {\
         auto BEString = ::BEString::ToString(BEValue);\
         BEConsoleIO::Get().Output(BEString, name##Reporter); \
@@ -64,7 +64,7 @@ void name##Output(TElem BEValue) \
 template<typename TElem> \
 void name##OutputClean(TElem BEValue) \
 { \
-    if constexpr(std::is_integral_v<TElem> && !std::is_same_v<::BEString::ValueType, TElem>) \
+    if constexpr((std::is_integral_v<TElem> || std::is_floating_point_v<TElem>) && !std::is_same_v<::BEString::ValueType, TElem>) \
     {\
         auto BEString = ::BEString::ToString(BEValue);\
         BEConsoleIO::Get().OutputClean(BEString, name##Reporter); \

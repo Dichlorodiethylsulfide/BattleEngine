@@ -22,7 +22,7 @@ void BEConsoleIO::Output(BEString& BEString, const BEIOReporterSpecifier& Report
     {
         return;
     }
-    std::cout << BEIOColorOutputModifier(Reporter.Code) << BETime::Now() << Reporter.BEReportString << ": " << BEString.Strip() << std::endl;
+    std::cout << BEIOColorOutputModifier(Reporter.Code) << BETime::NowAsString() << Reporter.BEReportString << ": " << BEString.Strip() << std::endl;
 }
 
 void BEConsoleIO::OutputClean(BEString& BEString, const BEIOReporterSpecifier& Reporter)
