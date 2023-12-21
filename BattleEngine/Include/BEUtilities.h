@@ -2,6 +2,8 @@
 
 #include<type_traits>
 
+#define STRINGIFY(x) #x
+
 #define DEFINE_BASIC_TYPE_TRAITS(template_type) \
 using ValueType = template_type; \
 using SizeType = size_t; \

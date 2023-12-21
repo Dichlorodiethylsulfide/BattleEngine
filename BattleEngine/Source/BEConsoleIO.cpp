@@ -25,16 +25,21 @@ void BEConsoleIO::Output(BEString& BEString, const BEIOReporterSpecifier& Report
     std::cout << BEIOColorOutputModifier(Reporter.Code) << BETime::NowAsString() << Reporter.BEReportString << ": " << BEString.Strip() << std::endl;
 }
 
-void BEConsoleIO::OutputClean(BEString& BEString, const BEIOReporterSpecifier& Reporter)
+void BEConsoleIO::OutputLineBreak()
+{
+    std::cout << std::endl;
+}
+
+void BEConsoleIO::OutputMulti(BEVector<BEString>&& Lines, const BEIOReporterSpecifier& Reporter)
 {
     if(Reporter.Mode < Get().ModesUnderDisabled)
     {
         return;
     }
-    std::cout << " " << BEIOColorOutputModifier(Reporter.Code) << Reporter.BEReportString << ": " << BEString.Strip();
-}
-
-void BEConsoleIO::OutputLineBreak()
-{
+    std::cout << BEIOColorOutputModifier(Reporter.Code) << BETime::NowAsString() << Reporter.BEReportString << ": ";
+    FOREACH(Lines)
+    {
+        std::cout << FOREACH_VALUE;
+    }
     std::cout << std::endl;
 }

@@ -119,7 +119,7 @@ public:
     template<typename TNonElemType>
     static BERawString ToString(TNonElemType&& Value)
     {
-        static_assert(!std::is_integral_v<TNonElemType>, "Must be an integral type");
+        static_assert(std::is_integral_v<TNonElemType>, "Must be an integral type");
         return std::to_string(Value).c_str();
     }
     

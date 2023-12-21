@@ -61,19 +61,10 @@ void name##Output(TElem BEValue) \
         BEConsoleIO::Get().Output(BEString, name##Reporter); \
     } \
 } \
-template<typename TElem> \
-void name##OutputClean(TElem BEValue) \
+void name##OutputMulti(BEVector<BEString>&& Lines) \
 { \
-    if constexpr((std::is_integral_v<TElem> || std::is_floating_point_v<TElem>) && !std::is_same_v<::BEString::ValueType, TElem>) \
-    {\
-        auto BEString = ::BEString::ToString(BEValue);\
-        BEConsoleIO::Get().OutputClean(BEString, name##Reporter); \
-    }\
-    else \
-    {   auto BEString = ::BEString(BEValue); \
-        BEConsoleIO::Get().OutputClean(BEString, name##Reporter); \
-    } \
-} 
+    BEConsoleIO::Get().OutputMulti(std::move(Lines), name##Reporter); \
+}
 
 class BEConsoleIO
 {
@@ -83,8 +74,8 @@ class BEConsoleIO
     ~BEConsoleIO() {}
     
     void Output(BEString& BEString, const BEIOReporterSpecifier& Reporter);
-    void OutputClean(BEString& BEString, const BEIOReporterSpecifier& Reporter);
     void OutputLineBreak();
+    void OutputMulti(BEVector<BEString>&& Lines, const BEIOReporterSpecifier& Reporter);
 public:
     static BEConsoleIO& Get()
     {
@@ -119,7 +110,7 @@ private:
 };
 
 #define CALL_REPORTER(name, x) BEConsoleIO::Get().##name##Output(x)
-#define CALL_REPORTER_CLEAN(name, x) BEConsoleIO::Get().##name##OutputClean(x)
+#define CALL_REPORTER_MULTI(name, ...) BEConsoleIO::Get().##name##OutputMulti({__VA_ARGS__})
 
 #if _DEBUG
 #define DEBUG(x) CALL_REPORTER(Debug, x)
@@ -129,17 +120,5 @@ private:
 
 #define LOG(x) CALL_REPORTER(Log, x)
 #define WARN(x) CALL_REPORTER(Warning, x)
-#define ERROR(x) do { \
-    CALL_REPORTER(Error, x); \
-    CALL_REPORTER_CLEAN(Error, __FILE__); \
-    CALL_REPORTER_CLEAN(Error, __LINE__); \
-    BEConsoleIO::LineBreak(); } \
-    while(0)
+#define ERROR(x) CALL_REPORTER_MULTI(Error, (x), "\n", __FILE__, " Line: ", BEString::ToString(__LINE__))
 #define SUCCESS(x) CALL_REPORTER(Success, x)
-
-/*template<typename FirstArgument, typename ... Arguments>
-void nibc_print(FirstArgument&& FirstArgs, Arguments&&... RestArgs)
-{
-    nibc_print(std::forward<FirstArgument>(FirstArgs), false);
-    nibc_print(std::forward<Arguments>(RestArgs)...);
-}*/
