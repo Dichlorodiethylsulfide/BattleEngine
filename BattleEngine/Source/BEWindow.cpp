@@ -3,24 +3,6 @@
 
 #include <SDL2/SDL_video.h>
 
-#include "SDL2/SDL_events.h"
-
-void BECPULoop::Tick()
-{
-    SDL_Event Event{};
-    while(SDL_PollEvent(&Event))
-    {
-        if (Event.type == SDL_KEYDOWN)
-        {
-            if (Event.key.keysym.sym == SDLK_ESCAPE)
-            {
-                m_shouldStopTicking = true;
-                break;
-            }
-        }
-    }
-}
-
 BEWindow::BEWindow(BEString WindowTitle, BEBox<int> Dimensions)
 {
     if(!Dimensions.IsValid())
@@ -33,7 +15,7 @@ BEWindow::BEWindow(BEString WindowTitle, BEBox<int> Dimensions)
     m_windowPointer = SDL_CreateWindow(m_windowTitle, Dimensions.TopLeft.X, Dimensions.TopLeft.Y, Dimensions.Dimensions.X, Dimensions.Dimensions.Y, SDL_WINDOW_SHOWN);
 }
 
-void BEWindow::EnterLoop()
+void BEWindow::EnterMainLoop()
 {
     if(!m_windowPointer)
     {
@@ -41,9 +23,16 @@ void BEWindow::EnterLoop()
         return;
     }
     LOG("Engine loop started.");
-    while(m_windowPointer && m_engineLoop)
+    while(m_windowPointer)
     {
-        m_engineLoop.Tick();
+        if(m_engineLoop.IsTicking(BETickState::Running))
+        {
+            m_engineLoop.EngineTick();
+        }
+        if(m_renderLoop.IsTicking(BETickState::Running))
+        {
+            m_renderLoop.EngineTick();
+        }
     }
     LOG("Engine loop ended.");
 }
