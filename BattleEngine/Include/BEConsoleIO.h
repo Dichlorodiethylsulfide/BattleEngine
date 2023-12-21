@@ -60,7 +60,20 @@ void name##Output(TElem BEValue) \
     {   auto BEString = ::BEString(BEValue); \
         BEConsoleIO::Get().Output(BEString, name##Reporter); \
     } \
-}
+} \
+template<typename TElem> \
+void name##OutputClean(TElem BEValue) \
+{ \
+    if constexpr(std::is_integral_v<TElem> && !std::is_same_v<::BEString::ValueType, TElem>) \
+    {\
+        auto BEString = ::BEString::ToString(BEValue);\
+        BEConsoleIO::Get().OutputClean(BEString, name##Reporter); \
+    }\
+    else \
+    {   auto BEString = ::BEString(BEValue); \
+        BEConsoleIO::Get().OutputClean(BEString, name##Reporter); \
+    } \
+} 
 
 class BEConsoleIO
 {
@@ -70,6 +83,8 @@ class BEConsoleIO
     ~BEConsoleIO() {}
     
     void Output(BEString& BEString, const BEIOReporterSpecifier& Reporter);
+    void OutputClean(BEString& BEString, const BEIOReporterSpecifier& Reporter);
+    void OutputLineBreak();
 public:
     static BEConsoleIO& Get()
     {
@@ -89,6 +104,10 @@ public:
     {
         Get().ModesUnderDisabled = BEIOReportMode::All;
     }
+    static void LineBreak()
+    {
+        Get().OutputLineBreak();
+    }
     DEFINE_LOG_OUTPUT(Log)
     DEFINE_LOG_OUTPUT(Debug)
     DEFINE_LOG_OUTPUT(Warning)
@@ -100,6 +119,7 @@ private:
 };
 
 #define CALL_REPORTER(name, x) BEConsoleIO::Get().##name##Output(x)
+#define CALL_REPORTER_CLEAN(name, x) BEConsoleIO::Get().##name##OutputClean(x)
 
 #if _DEBUG
 #define DEBUG(x) CALL_REPORTER(Debug, x)
@@ -109,5 +129,10 @@ private:
 
 #define LOG(x) CALL_REPORTER(Log, x)
 #define WARN(x) CALL_REPORTER(Warning, x)
-#define ERROR(x) do { CALL_REPORTER(Error, x); CALL_REPORTER(Error, __FILE__); } while(0)
+#define ERROR(x) do { \
+    CALL_REPORTER(Error, x); \
+    CALL_REPORTER_CLEAN(Error, __FILE__); \
+    CALL_REPORTER_CLEAN(Error, __LINE__); \
+    BEConsoleIO::LineBreak(); } \
+    while(0)
 #define SUCCESS(x) CALL_REPORTER(Success, x)

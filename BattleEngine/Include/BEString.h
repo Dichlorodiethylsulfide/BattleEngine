@@ -111,6 +111,11 @@ public:
         return *this;
     }
 
+    operator ConstPointer()
+    {
+        return Base::GetBuffer();
+    }
+
     template<typename TNonElemType>
     static BERawString ToString(TNonElemType&& Value)
     {

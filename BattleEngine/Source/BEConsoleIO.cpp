@@ -22,6 +22,19 @@ void BEConsoleIO::Output(BEString& BEString, const BEIOReporterSpecifier& Report
     {
         return;
     }
-    std::cout << BEIOColorOutputModifier(Reporter.Code);
-    std::cout << BETime::Now() << Reporter.BEReportString << ": " << BEString.Strip() << std::endl;
+    std::cout << BEIOColorOutputModifier(Reporter.Code) << BETime::Now() << Reporter.BEReportString << ": " << BEString.Strip() << std::endl;
+}
+
+void BEConsoleIO::OutputClean(BEString& BEString, const BEIOReporterSpecifier& Reporter)
+{
+    if(Reporter.Mode < Get().ModesUnderDisabled)
+    {
+        return;
+    }
+    std::cout << " " << BEIOColorOutputModifier(Reporter.Code) << Reporter.BEReportString << ": " << BEString.Strip();
+}
+
+void BEConsoleIO::OutputLineBreak()
+{
+    std::cout << std::endl;
 }

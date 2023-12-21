@@ -1,32 +1,8 @@
 ﻿#pragma once
 
-#include<ranges> // remove: for std::move
+#include <ranges> // remove: for std::move
 #include <initializer_list>
-
-#define DEFINE_BASIC_TYPE_TRAITS(template_type) \
-using ValueType = template_type; \
-using SizeType = size_t; \
-using Pointer = ValueType*; \
-using ConstPointer = const ValueType*; \
-using Ref = ValueType&; \
-using ConstRef = const ValueType&; \
-using MovedType = ValueType&&;
-
-#define DEFINE_ITERATOR_TYPE_TRAITS(template_type) \
-using Iterator = Iter<template_type>; \
-using ConstIterator = ConstIter<template_type>; \
-using ReverseIterator = ReverseIter<template_type>; \
-using ConstReverseIterator = ConstReverseIter<template_type>;
-
-#define DEFINE_INHERITED_TYPE_TRAITS(base) \
-using Base = base; \
-using ValueType = typename Base::ValueType; \
-using SizeType = typename Base::SizeType; \
-using Pointer = typename Base::ValueType*; \
-using ConstPointer = const typename Base::ValueType*; \
-using Ref = typename Base::ValueType&; \
-using ConstRef = const typename Base::ValueType&; \
-using MovedType = typename Base::MovedType;
+#include "BEUtilities.h"
 
 template<typename TType>
 struct Bad
