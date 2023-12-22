@@ -94,6 +94,12 @@ public:
     }
 
     template<typename TElem>
+    operator TElem*()
+    {
+        return Cast<TElem>();
+    }
+    
+    template<typename TElem>
     TElem* Cast()
     {
         return static_cast<TElem*>(pointer);

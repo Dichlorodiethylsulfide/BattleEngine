@@ -2,6 +2,7 @@
 
 #include <ranges> // remove: for std::move
 #include <initializer_list>
+
 #include "BEUtilities.h"
 
 template<typename TType>
@@ -281,9 +282,10 @@ public:
     }
     
     BEArray(SizeType Capacity)
-        : m_capacity(!Capacity ? 1 : Capacity)
+        : m_capacity(Capacity)
     {
-        m_elements = m_allocator.Allocate(Capacity);
+        // Always allocate at least some data, as long as we track it properly, we can deallocate it and move on once we have more elements
+        m_elements = m_allocator.Allocate(!Capacity ? 1 : Capacity);
     }
     BEArray()
     : BEArray(1)
@@ -355,6 +357,10 @@ public:
     }
     void Resize(SizeType NewSize)
     {
+        if(!m_capacity && !NewSize)
+        {
+            NewSize = 1;
+        }
         m_allocator.Reallocate(m_elements, m_capacity, NewSize);
     }
     Ref Front()

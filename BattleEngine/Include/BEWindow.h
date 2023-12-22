@@ -10,6 +10,8 @@ public:
     BEWindow(BEString WindowTitle, BEBox<int> Dimensions, unsigned int FrameRate = 60);
     void EnterMainLoop();
     ~BEWindow();
+    static void Init();
+    static void Quit();
 private:
     void EnsureFrameTimeIsKept();
     BEString m_windowTitle{"Default Window"};

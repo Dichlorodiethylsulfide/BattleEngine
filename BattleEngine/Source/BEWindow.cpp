@@ -3,6 +3,7 @@
 #include "BETime.h"
 
 #include <SDL2/SDL_video.h>
+#include "SDL2/SDL.h"
 
 BEWindow::BEWindow(BEString WindowTitle, BEBox<int> Dimensions, unsigned int FrameRate)
 {
@@ -20,6 +21,7 @@ BEWindow::BEWindow(BEString WindowTitle, BEBox<int> Dimensions, unsigned int Fra
     m_windowDimensions = Dimensions;
     m_windowPointer = SDL_CreateWindow(m_windowTitle, Dimensions.TopLeft.X, Dimensions.TopLeft.Y, Dimensions.Dimensions.X, Dimensions.Dimensions.Y, SDL_WINDOW_SHOWN);
     m_millisecondsPerFrame = 1000 / FrameRate;
+    m_renderLoop = {m_windowPointer};
 }
 
 void BEWindow::EnterMainLoop()
@@ -56,6 +58,19 @@ BEWindow::~BEWindow()
     {
         SDL_DestroyWindow(m_windowPointer.Cast<SDL_Window>());
     }
+}
+
+void BEWindow::Init()
+{
+    if(SDL_Init(SDL_INIT_EVERYTHING) < 0)
+    {
+        WARN(SDL_GetError());
+    }
+}
+
+void BEWindow::Quit()
+{
+    SDL_Quit();
 }
 
 void BEWindow::EnsureFrameTimeIsKept()

@@ -1,5 +1,6 @@
 ﻿#include "BEEngineLoop.h"
 #include "SDL2/SDL_events.h"
+#include "SDL2/SDL_render.h"
 
 void BECPULoop::EngineTick()
 {
@@ -15,9 +16,26 @@ void BECPULoop::EngineTick()
             }
         }
     }
+    FOREACH(m_tickableObjects)
+    {
+        const_cast<BEVector<BETickable>::Ref>(FOREACH_VALUE).Tick();
+    }
+}
+
+BEGPULoop::BEGPULoop(External WindowPointer)
+    : BERenderer(WindowPointer)
+{
+    auto renderable = BERenderable();
+    renderable.LoadTexture(*this, "C:\\Users\\rikil\\Desktop\\Block.png", {{0, 0}, {50, 50}});
+    m_renderableObjects.PushBack(std::move(renderable));
 }
 
 void BEGPULoop::EngineTick()
 {
-    
+    ClearWindow();
+    FOREACH(m_renderableObjects)
+    {
+        RenderCopy(const_cast<BEVector<BERenderable>::Ref>(FOREACH_VALUE));
+    }
+    RenderPresent();
 }

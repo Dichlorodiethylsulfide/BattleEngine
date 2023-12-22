@@ -109,6 +109,8 @@ private:
     BEIOReportMode ModesUnderDisabled = BEIOReportMode::None;
 };
 
+#define WARNINGS_AS_ERRORS 1
+
 #define CALL_REPORTER(name, x) BEConsoleIO::Get().##name##Output(x)
 #define CALL_REPORTER_MULTI(name, ...) BEConsoleIO::Get().##name##OutputMulti({__VA_ARGS__})
 
@@ -119,6 +121,11 @@ private:
 #endif
 
 #define LOG(x) CALL_REPORTER(Log, x)
-#define WARN(x) CALL_REPORTER(Warning, x)
 #define ERROR(x) CALL_REPORTER_MULTI(Error, (x), "\n", __FILE__, " Line: ", BEString::ToString(__LINE__))
 #define SUCCESS(x) CALL_REPORTER(Success, x)
+
+#if WARNINGS_AS_ERRORS
+#define WARN(x) ERROR(x)
+#else
+#define WARN(x) CALL_REPORTER(Warning, x)
+#endif

@@ -1,6 +1,8 @@
 ﻿#pragma once
 
+#include "BEVector.h"
 #include "BETickable.h"
+#include "BERenderer.h"
 
 class BEEnineLoop
 {
@@ -19,10 +21,16 @@ class BECPULoop : public BEEnineLoop// main engine loop, performed on the CPU, m
 {
 public:
     void EngineTick() override;
+private:
+    BEVector<BETickable> m_tickableObjects{};
 };
 
-class BEGPULoop : public BEEnineLoop
+class BEGPULoop : public BEEnineLoop, public BERenderer
 {
 public:
+    BEGPULoop() = default;
+    BEGPULoop(External WindowPointer);
     void EngineTick() override;
+private:
+    BEVector<BERenderable> m_renderableObjects{};
 };
