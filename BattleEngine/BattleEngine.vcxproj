@@ -929,6 +929,12 @@
     <Content Include="External\SDL\lib\x86\SDL2_image.dll" />
     <Content Include="External\SDL\lib\x86\SDL2_image.lib" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SDL\SDL.vcxproj">
+      <Project>{0e4d0991-ff4f-4f6c-bc30-48fedbb7c5c3}</Project>
+      <Name>SDL</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
