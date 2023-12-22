@@ -46,6 +46,11 @@ struct BEBox
     BEVector2D<TElem> TopLeft;
     BEVector2D<TElem> Dimensions;
 
+    static BEBox MakeDimensions(TElem X, TElem Y, TElem Width, TElem Height)
+    {
+        return {{X, Y}, {Width, Height}};
+    }
+
     bool IsValid() const
     {
         return Dimensions.X != 0 && Dimensions.Y != 0;

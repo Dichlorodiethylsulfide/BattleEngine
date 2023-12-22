@@ -7,7 +7,9 @@
 class BEWindow
 {
 public:
-    BEWindow(BEString WindowTitle, BEBox<int> Dimensions, unsigned int FrameRate = 60);
+    using Dimensions = BEBox<int>;
+    
+    BEWindow(BEString WindowTitle, Dimensions Dimensions, unsigned int FrameRate = 60);
     void EnterMainLoop();
     ~BEWindow();
     static void Init();
@@ -15,7 +17,7 @@ public:
 private:
     void EnsureFrameTimeIsKept();
     BEString m_windowTitle{"Default Window"};
-    BEBox<int> m_windowDimensions{{0, 0}, {0, 0}};
+    Dimensions m_windowDimensions{};
     External m_windowPointer;
     BECPULoop m_engineLoop{};
     BEGPULoop m_renderLoop{};

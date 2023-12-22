@@ -4,8 +4,9 @@
 
 #include <SDL2/SDL_video.h>
 #include "SDL2/SDL.h"
+#include "SDL2/SDL_image.h"
 
-BEWindow::BEWindow(BEString WindowTitle, BEBox<int> Dimensions, unsigned int FrameRate)
+BEWindow::BEWindow(BEString WindowTitle, Dimensions Dimensions, unsigned int FrameRate)
 {
     if(FrameRate < 1)
     {
@@ -66,11 +67,16 @@ void BEWindow::Init()
     {
         WARN(SDL_GetError());
     }
+    if(!IMG_Init(IMG_INIT_PNG))
+    {
+        WARN(SDL_GetError());
+    }
 }
 
 void BEWindow::Quit()
 {
     SDL_Quit();
+    IMG_Quit();
 }
 
 void BEWindow::EnsureFrameTimeIsKept()

@@ -10,7 +10,7 @@ BERenderer::BERenderer(External WindowPointer)
         ERROR("Invalid Window Pointer passed through to Renderer.");
         return;
     }
-    m_rendererPointer = SDL_CreateRenderer(WindowPointer, -1, SDL_RENDERER_ACCELERATED);
+    m_rendererPointer = SDL_CreateRenderer(WindowPointer, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if(!m_rendererPointer)
     {
         ERROR("Failed to create Rendering Context.");
