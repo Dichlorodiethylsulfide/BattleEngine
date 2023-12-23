@@ -1,8 +1,9 @@
 ﻿#include "BEConsoleIO.h"
 #include "BERenderer.h"
 
-#include "SDL2/SDL_image.h"
-#include "SDL2/SDL_render.h"
+#include "SDL.h"
+#include "SDL_image.h"
+
 
 BERenderable::~BERenderable()
 {

@@ -2,9 +2,8 @@
 #include "BEConsoleIO.h"
 #include "BETime.h"
 
-#include <SDL2/SDL_video.h>
-#include "SDL2/SDL.h"
-#include "SDL2/SDL_image.h"
+#include "SDL.h"
+
 
 BEWindow::BEWindow(BEString WindowTitle, Dimensions Dimensions, unsigned int FrameRate)
 {
@@ -67,16 +66,16 @@ void BEWindow::Init()
     {
         WARN(SDL_GetError());
     }
-    if(!IMG_Init(IMG_INIT_PNG))
+    /*if(!IMG_Init(IMG_INIT_PNG))
     {
         WARN(SDL_GetError());
-    }
+    }*/
 }
 
 void BEWindow::Quit()
 {
     SDL_Quit();
-    IMG_Quit();
+    //IMG_Quit();
 }
 
 void BEWindow::EnsureFrameTimeIsKept()
