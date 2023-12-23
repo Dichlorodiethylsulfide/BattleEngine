@@ -21,5 +21,10 @@ void BERenderable::LoadTexture(BERenderer& Renderer, BEString TextureFilepath, B
         return;
     }
     m_renderTexture = IMG_LoadTexture(Renderer.m_rendererPointer, TextureFilepath);
+    if(m_renderTexture)
+    {
+        ERROR("Failed to load texture from FilePath.");
+        return;
+    }
     m_rect = Rect;
 }

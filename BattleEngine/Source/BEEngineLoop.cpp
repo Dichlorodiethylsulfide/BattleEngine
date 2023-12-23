@@ -25,7 +25,7 @@ BEGPULoop::BEGPULoop(External WindowPointer)
     : BERenderer(WindowPointer)
 {
     auto renderable = BERenderable();
-    renderable.LoadTexture(*this, "C:\\Users\\rikil\\Desktop\\Block.png", {{100, 100}, {32, 32}});
+    renderable.LoadTexture(*this, "..\\..\\BattleEngine\\Resources\\Block.png", {{100, 100}, {32, 32}});
     m_renderableObjects.PushBack(std::move(renderable));
 }
 

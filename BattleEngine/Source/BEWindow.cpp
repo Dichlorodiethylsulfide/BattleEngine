@@ -3,6 +3,7 @@
 #include "BETime.h"
 
 #include "SDL2/SDL.h"
+#include "SDL2/SDL_image.h"
 
 
 BEWindow::BEWindow(BEString WindowTitle, Dimensions Dimensions, unsigned int FrameRate)
@@ -66,10 +67,10 @@ void BEWindow::Init()
     {
         WARN(SDL_GetError());
     }
-    /*if(!IMG_Init(IMG_INIT_PNG))
+    if(!IMG_Init(IMG_INIT_PNG))
     {
         WARN(SDL_GetError());
-    }*/
+    }
 }
 
 void BEWindow::Quit()
