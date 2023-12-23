@@ -1,7 +1,7 @@
 ﻿#include "BERenderer.h"
 #include "BEConsoleIO.h"
 
-#include "SDL_render.h"
+#include "SDL2/SDL_render.h"
 
 BERenderer::BERenderer(External WindowPointer)
 {

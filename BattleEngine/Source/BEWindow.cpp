@@ -2,7 +2,7 @@
 #include "BEConsoleIO.h"
 #include "BETime.h"
 
-#include "SDL.h"
+#include "SDL2/SDL.h"
 
 
 BEWindow::BEWindow(BEString WindowTitle, Dimensions Dimensions, unsigned int FrameRate)

@@ -164,6 +164,10 @@
       <Project>{d51145e5-3983-41d9-8275-dcfd7407a232}</Project>
       <Name>BattleEngine</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SDL\SDL.vcxproj">
+      <Project>{0e4d0991-ff4f-4f6c-bc30-48fedbb7c5c3}</Project>
+      <Name>SDL</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
