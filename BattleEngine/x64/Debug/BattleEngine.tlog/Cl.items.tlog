@@ -1,13 +1,1 @@
 C:\git\BattleEngine\BattleEngine\dllmain.cpp;C:\git\BattleEngine\BattleEngine\x64\Debug\dllmain.obj
-C:\git\BattleEngine\BattleEngine\Source\BEArray.cpp;C:\git\BattleEngine\BattleEngine\x64\Debug\BEArray.obj
-C:\git\BattleEngine\BattleEngine\Source\BEConsoleIO.cpp;C:\git\BattleEngine\BattleEngine\x64\Debug\BEConsoleIO.obj
-C:\git\BattleEngine\BattleEngine\Source\BEEngineLoop.cpp;C:\git\BattleEngine\BattleEngine\x64\Debug\BEEngineLoop.obj
-C:\git\BattleEngine\BattleEngine\Source\BEList.cpp;C:\git\BattleEngine\BattleEngine\x64\Debug\BEList.obj
-C:\git\BattleEngine\BattleEngine\Source\BERenderable.cpp;C:\git\BattleEngine\BattleEngine\x64\Debug\BERenderable.obj
-C:\git\BattleEngine\BattleEngine\Source\BERenderer.cpp;C:\git\BattleEngine\BattleEngine\x64\Debug\BERenderer.obj
-C:\git\BattleEngine\BattleEngine\Source\BEString.cpp;C:\git\BattleEngine\BattleEngine\x64\Debug\BEString.obj
-C:\git\BattleEngine\BattleEngine\Source\BETickable.cpp;C:\git\BattleEngine\BattleEngine\x64\Debug\BETickable.obj
-C:\git\BattleEngine\BattleEngine\Source\BETime.cpp;C:\git\BattleEngine\BattleEngine\x64\Debug\BETime.obj
-C:\git\BattleEngine\BattleEngine\Source\BEUtilities.cpp;C:\git\BattleEngine\BattleEngine\x64\Debug\BEUtilities.obj
-C:\git\BattleEngine\BattleEngine\Source\BEVector.cpp;C:\git\BattleEngine\BattleEngine\x64\Debug\BEVector.obj
-C:\git\BattleEngine\BattleEngine\Source\BEWindow.cpp;C:\git\BattleEngine\BattleEngine\x64\Debug\BEWindow.obj

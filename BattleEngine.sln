@@ -4,8 +4,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BattleEngine", "BattleEngin
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BigBattle", "BigBattle\BigBattle.vcxproj", "{A24BCF0F-0A56-44D4-98D3-2A00178F48B1}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDL", "SDL\SDL.vcxproj", "{0E4D0991-FF4F-4F6C-BC30-48FEDBB7C5C3}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -30,13 +28,5 @@ Global
 		{A24BCF0F-0A56-44D4-98D3-2A00178F48B1}.Release|Win32.Build.0 = Release|Win32
 		{A24BCF0F-0A56-44D4-98D3-2A00178F48B1}.Release|x64.ActiveCfg = Release|x64
 		{A24BCF0F-0A56-44D4-98D3-2A00178F48B1}.Release|x64.Build.0 = Release|x64
-		{0E4D0991-FF4F-4F6C-BC30-48FEDBB7C5C3}.Debug|Win32.ActiveCfg = Debug|Win32
-		{0E4D0991-FF4F-4F6C-BC30-48FEDBB7C5C3}.Debug|Win32.Build.0 = Debug|Win32
-		{0E4D0991-FF4F-4F6C-BC30-48FEDBB7C5C3}.Debug|x64.ActiveCfg = Debug|x64
-		{0E4D0991-FF4F-4F6C-BC30-48FEDBB7C5C3}.Debug|x64.Build.0 = Debug|x64
-		{0E4D0991-FF4F-4F6C-BC30-48FEDBB7C5C3}.Release|Win32.ActiveCfg = Release|Win32
-		{0E4D0991-FF4F-4F6C-BC30-48FEDBB7C5C3}.Release|Win32.Build.0 = Release|Win32
-		{0E4D0991-FF4F-4F6C-BC30-48FEDBB7C5C3}.Release|x64.ActiveCfg = Release|x64
-		{0E4D0991-FF4F-4F6C-BC30-48FEDBB7C5C3}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 EndGlobal
