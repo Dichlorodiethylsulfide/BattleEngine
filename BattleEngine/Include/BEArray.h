@@ -5,6 +5,93 @@
 
 #include "BEUtilities.h"
 
+enum class BEAllocationTrackingState
+{
+    NoTracking = 0, // do not track at all
+    LiteTracking, // track simple allocation +1 and -1
+    StrictTracking // track object in object graph?
+};
+
+#define ALLOC_COUNT 100
+extern struct BETrackedAllocation* allocations;
+extern size_t totalAllocations;
+extern size_t totalDeallocations;
+
+// Object allocation could be tracked using an ObjectGraph?
+struct BETrackedAllocation
+{
+    void* pointer = nullptr;
+    bool is_free = true;
+    size_t index = -1;
+
+    BETrackedAllocation()
+    {
+        pointer = nullptr;
+        is_free = true;
+        index = -1;
+    }
+    BETrackedAllocation(void* ptr, size_t indx)
+    {
+        pointer = ptr;
+        is_free = false;
+        index = indx;
+    }
+
+    static void* AddAllocation(void* ptr)
+    {
+        if(not ptr)
+        {
+            return nullptr;
+        }
+        allocations[totalAllocations] = BETrackedAllocation(ptr, totalAllocations);
+        totalAllocations++;
+        return ptr;
+    }
+
+    static void RemoveAllocation(void* ptr)
+    {
+        if(not ptr)
+        {
+            return;
+        }
+        size_t index = FindAllocation(ptr);
+        if(index != -1)
+        {
+            allocations[index] = {};
+            totalDeallocations++;
+        }
+    }
+
+    static void ReplaceAllocation(void* old_ptr, void* new_ptr)
+    {
+        if(not old_ptr || not new_ptr)
+        {
+            return;
+        }
+        size_t index = FindAllocation(old_ptr);
+        if(index != -1)
+        {
+            allocations[index].pointer = new_ptr;
+        }
+    }
+
+    static size_t FindAllocation(void* ptr)
+    {
+        if(!ptr)
+        {
+            return -1;
+        }
+        for(size_t i = 0; i < ALLOC_COUNT; i++)
+        {
+            if(allocations[i].pointer == ptr)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+};
+
 template<typename TType>
 struct Bad
 {
@@ -210,40 +297,114 @@ public:
     DEFINE_BASIC_TYPE_TRAITS(TElem)
     
     static_assert(!std::is_const_v<TElem>, "Cannot allocate constant types");
+    static_assert(!std::is_function_v<TElem>, "Cannot allocate function types");
+    static_assert(!std::is_reference_v<TElem>, "Cannot allocate reference types");
 
-    Pointer Allocate(SizeType Count)
+    static constexpr Pointer Allocate(SizeType Count)
     {
-        return static_cast<Pointer>(::operator new(Count * sizeof(ValueType)));
+        if constexpr(std::is_arithmetic_v<TElem>)
+        {
+            return (Pointer)BETrackedAllocation::AddAllocation(new TElem[Count]);
+        }
+        else
+        {
+            return static_cast<Pointer>(BETrackedAllocation::AddAllocation(::operator new(Count * sizeof(ValueType))));
+        }
     }
 
-    void Deallocate(Pointer& Ptr, SizeType& Size)
+    static constexpr void Deallocate(Pointer& Ptr, SizeType& Size)
     {
         if(Ptr)
         {
-            ::operator delete(Ptr);
+            BETrackedAllocation::RemoveAllocation(Ptr);
+            if constexpr(std::is_arithmetic_v<TElem>)
+            {
+                delete [] Ptr;
+            }
+            else
+            {
+                ::operator delete(Ptr);
+            }
             Ptr = nullptr;
         }
         Size = 0;
     }
 
-    void Reallocate(Pointer& Elements, SizeType& OldSize, SizeType NewSize)
+    static constexpr void Reallocate(Pointer& Elements, SizeType& OldSize, SizeType NewSize)
     {
         if(NewSize <= OldSize)
         {
             return;
         }
         auto* NewElements = Allocate(NewSize);
+        BETrackedAllocation::ReplaceAllocation(Elements, NewElements);
         Move(NewElements, Elements, OldSize);
         Deallocate(Elements, OldSize);
         OldSize = NewSize;
         Elements = NewElements;
     }
 
+    static constexpr void ConstructNew(Pointer ElementPtr, ConstRef Element)
+    {
+        if constexpr(std::is_arithmetic_v<TElem>)
+        {
+            *ElementPtr = Element;
+        }
+        else
+        {
+            new(ElementPtr)TElem(Element);
+        }
+    }
+
+    static constexpr void ConstructNew(Pointer ElementPtr, MovedType Element)
+    {
+        if constexpr(std::is_arithmetic_v<TElem>)
+        {
+            *ElementPtr = std::move(Element);
+        }
+        else
+        {
+            new(ElementPtr)TElem(std::move(Element));
+        }
+    }
+
+    static constexpr void ConstructAt(Pointer Elements, SizeType Index, ConstRef Element)
+    {
+        if constexpr(std::is_arithmetic_v<TElem>)
+        {
+            Elements[Index] = Element;
+        }
+        else
+        {
+            new(&Elements[Index])TElem(Element);
+        }
+    }
+
+    static constexpr void ConstructAt(Pointer Elements, SizeType Index, MovedType Element)
+    {
+        if constexpr(std::is_arithmetic_v<TElem>)
+        {
+            Elements[Index] = std::move(Element);
+        }
+        else
+        {
+            new(&Elements[Index])TElem(std::move(Element));
+        }
+    }
+
+    static constexpr void DestructAt(Pointer Elements, SizeType Index)
+    {
+        if constexpr(!std::is_arithmetic_v<TElem>)
+        {
+            Elements[Index].~TElem();
+        }
+    }
+
     static void Copy(Pointer Destination, ConstPointer Source, SizeType Length)
     {
         for(SizeType i = 0; i < Length; i++)
         {
-            Destination[i] = Source[i];
+            ConstructAt(Destination, i, Source[i]);
         }
     }
 
@@ -251,7 +412,7 @@ public:
     {
         for(SizeType i = 0; i < Length; i++)
         {
-            Destination[i] = std::move(Source[i]);
+            ConstructAt(Destination, i, std::move(Source[i]));
         }
     }
 };
@@ -285,7 +446,7 @@ public:
         : m_capacity(Capacity)
     {
         // Always allocate at least some data, as long as we track it properly, we can deallocate it and move on once we have more elements
-        m_elements = m_allocator.Allocate(!Capacity ? 1 : Capacity);
+        m_elements = Allocator::Allocate(!Capacity ? 1 : Capacity);
     }
     BEArray()
     : BEArray(1)
@@ -315,15 +476,15 @@ public:
     }
     virtual ~BEArray()
     {
-        m_allocator.Deallocate(m_elements, m_capacity);
+        Allocator::Deallocate(m_elements, m_capacity);
     }
     BEArray& operator=(const BEArray& Other)
     {
         if(!IsObjectEqual(m_elements, Other.m_elements))
         {
-            m_allocator.Deallocate(m_elements, m_capacity);
+            Allocator::Deallocate(m_elements, m_capacity);
             m_capacity = Other.m_capacity;
-            m_elements = m_allocator.Allocate(m_capacity);
+            m_elements = Allocator::Allocate(m_capacity);
             Allocator::Copy(m_elements, Other.m_elements, m_capacity);
         }
         return *this;
@@ -361,7 +522,7 @@ public:
         {
             NewSize = 1;
         }
-        m_allocator.Reallocate(m_elements, m_capacity, NewSize);
+        Allocator::Reallocate(m_elements, m_capacity, NewSize);
     }
     Ref Front()
     {
@@ -446,6 +607,4 @@ protected:
     }
     SizeType m_capacity{};
     ValueType* m_elements{};
-private:
-    Allocator m_allocator{};
 };

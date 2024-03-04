@@ -198,7 +198,7 @@
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <ObjectFileName>x64\Debug\</ObjectFileName>
       <CallingConvention>Cdecl</CallingConvention>
-      <ProgramDataBaseFileName>C:\Users\rikil\Documents\Coding\C++\BattleEngine\BigBattle\x64\Debug\BattleEngine.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>C:\git\BattleEngine\BigBattle\x64\Debug\BattleEngine.pdb</ProgramDataBaseFileName>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>x64\Debug\BattleEngine.pch</PrecompiledHeaderOutputFile>
@@ -271,7 +271,7 @@
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <ObjectFileName>x64\Debug\</ObjectFileName>
       <CallingConvention>Cdecl</CallingConvention>
-      <ProgramDataBaseFileName>C:\Users\rikil\Documents\Coding\C++\BattleEngine\BigBattle\x64\Debug\BattleEngine.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>C:\git\BattleEngine\BigBattle\x64\Debug\BattleEngine.pdb</ProgramDataBaseFileName>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>x64\Debug\BattleEngine.pch</PrecompiledHeaderOutputFile>
@@ -306,6 +306,7 @@
       <LibCompiled>true</LibCompiled>
     </ClCompile>
     <ClCompile Include="Source\BEEngineLoop.cpp" />
+    <ClCompile Include="Source\BEList.cpp" />
     <ClCompile Include="Source\BERenderable.cpp" />
     <ClCompile Include="Source\BERenderer.cpp" />
     <ClCompile Include="Source\BEString.cpp">
@@ -347,7 +348,7 @@
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <ObjectFileName>x64\Debug\</ObjectFileName>
       <CallingConvention>Cdecl</CallingConvention>
-      <ProgramDataBaseFileName>C:\Users\rikil\Documents\Coding\C++\BattleEngine\BigBattle\x64\Debug\BattleEngine.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>C:\git\BattleEngine\BigBattle\x64\Debug\BattleEngine.pdb</ProgramDataBaseFileName>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>x64\Debug\BattleEngine.pch</PrecompiledHeaderOutputFile>
@@ -420,7 +421,7 @@
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <ObjectFileName>x64\Debug\</ObjectFileName>
       <CallingConvention>Cdecl</CallingConvention>
-      <ProgramDataBaseFileName>C:\Users\rikil\Documents\Coding\C++\BattleEngine\BigBattle\x64\Debug\BattleEngine.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>C:\git\BattleEngine\BigBattle\x64\Debug\BattleEngine.pdb</ProgramDataBaseFileName>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>x64\Debug\BattleEngine.pch</PrecompiledHeaderOutputFile>
@@ -494,7 +495,7 @@
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <ObjectFileName>x64\Debug\</ObjectFileName>
       <CallingConvention>Cdecl</CallingConvention>
-      <ProgramDataBaseFileName>C:\Users\rikil\Documents\Coding\C++\BattleEngine\BigBattle\x64\Debug\BattleEngine.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>C:\git\BattleEngine\BigBattle\x64\Debug\BattleEngine.pdb</ProgramDataBaseFileName>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>x64\Debug\BattleEngine.pch</PrecompiledHeaderOutputFile>
@@ -567,7 +568,7 @@
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <ObjectFileName>x64\Debug\</ObjectFileName>
       <CallingConvention>Cdecl</CallingConvention>
-      <ProgramDataBaseFileName>C:\Users\rikil\Documents\Coding\C++\BattleEngine\BigBattle\x64\Debug\BattleEngine.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>C:\git\BattleEngine\BigBattle\x64\Debug\BattleEngine.pdb</ProgramDataBaseFileName>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>x64\Debug\BattleEngine.pch</PrecompiledHeaderOutputFile>
@@ -641,7 +642,7 @@
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <ObjectFileName>x64\Debug\</ObjectFileName>
       <CallingConvention>Cdecl</CallingConvention>
-      <ProgramDataBaseFileName>C:\Users\rikil\Documents\Coding\C++\BattleEngine\BigBattle\x64\Debug\BattleEngine.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>C:\git\BattleEngine\BigBattle\x64\Debug\BattleEngine.pdb</ProgramDataBaseFileName>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>x64\Debug\BattleEngine.pch</PrecompiledHeaderOutputFile>
@@ -682,6 +683,7 @@
     <ClInclude Include="Include\BEArray.h" />
     <ClInclude Include="Include\BEConsoleIO.h" />
     <ClInclude Include="Include\BEEngineLoop.h" />
+    <ClInclude Include="Include\BEList.h" />
     <ClInclude Include="Include\BERenderable.h" />
     <ClInclude Include="Include\BERenderer.h" />
     <ClInclude Include="Include\BEString.h" />

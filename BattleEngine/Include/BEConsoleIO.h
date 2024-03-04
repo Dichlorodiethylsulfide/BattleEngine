@@ -109,7 +109,7 @@ private:
     BEIOReportMode ModesUnderDisabled = BEIOReportMode::None;
 };
 
-#define WARNINGS_AS_ERRORS 1
+#define WARNINGS_AS_ERRORS 0
 
 #define CALL_REPORTER(name, x) BEConsoleIO::Get().##name##Output(x)
 #define CALL_REPORTER_MULTI(name, ...) BEConsoleIO::Get().##name##OutputMulti({__VA_ARGS__})
@@ -128,4 +128,10 @@ private:
 #define WARN(x) ERROR(x)
 #else
 #define WARN(x) CALL_REPORTER(Warning, x)
+#endif
+
+#if _DEBUG
+#define DEBUG_ENSURE(_boolean, msg) do { if(!!(_boolean)) { CALL_REPORTER_MULTI(Error, "Ensure condition failed: ", STRINGIFY(_boolean)); ERROR(msg); } } while(0)
+#else
+#define DEBUG_ENSURE(_boolean, msg)
 #endif

@@ -24,9 +24,9 @@ void BECPULoop::EngineTick()
 BEGPULoop::BEGPULoop(External WindowPointer)
     : BERenderer(WindowPointer)
 {
-    auto renderable = BERenderable();
-    renderable.LoadTexture(*this, "..\\..\\BattleEngine\\Resources\\Block.png", {{100, 100}, {32, 32}});
-    m_renderableObjects.PushBack(std::move(renderable));
+    //auto renderable = BERenderable();
+    //renderable.LoadTexture(*this, "..\\..\\BattleEngine\\Resources\\Block.png", {{100, 100}, {32, 32}});
+    //m_renderableObjects.PushBack(std::move(renderable));
 }
 
 void BEGPULoop::EngineTick()
