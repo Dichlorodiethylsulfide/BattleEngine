@@ -31,6 +31,6 @@
 *.out
 *.app
 
-x64/*
-BattleEngine/x64/*
-BigBattle/x64/*
+x64/
+BattleEngine/x64/
+BigBattle/x64/
