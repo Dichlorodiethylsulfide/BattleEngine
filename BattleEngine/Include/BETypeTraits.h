@@ -132,8 +132,8 @@ struct TAddPointer
  * template<typename T BE_REQUIRES(sizeof(T) >= 4)> void Function()
  */
 template<bool Value>
-constexpr bool bRequiresTrue = Value;
-#define BE_REQUIRES(...) > requires __VA_ARGS__ && bRequiresTrue<true
+concept bRequiresTrue = Value;
+#define BE_REQUIRES(...) > requires !!((__VA_ARGS__)) && bRequiresTrue<true
 #endif
 
 #define BE_T_EXPOSE_NAME(type) \

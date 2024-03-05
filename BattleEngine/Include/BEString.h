@@ -9,7 +9,10 @@ public:
     BEString(const CHAR* CString);
     ~BEString();
 
+    // BEString& operator=(const CHAR* CString);
+
     void Clear();
+    bool IsEmpty() const;
     
     const CHAR* CStr() const;
 
@@ -21,6 +24,7 @@ private:
         uint128 High;
         uint128 Low; 
     };
+    static_assert(sizeof(SSO) == 32, "Do not modify the size of the SmallStringOptimisation type");
     union
     {
         SSO SmallString;

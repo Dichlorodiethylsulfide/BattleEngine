@@ -9,28 +9,27 @@ struct BEMemory
     static void OnOutOfMemory();
     static void CheckMaxAlloc(SizeType Bytes);
 
-
+    template<typename T BE_REQUIRES(TIsArithmetic<T>::Value)>
     struct BEByteOperations
     {
-        BE_FORCEINLINE static bool CheckByteBoundary(SizeType Limit, SizeType Index)
+        BE_FORCEINLINE static bool CheckBoundary(SizeType Limit, SizeType Index)
         {
-            return Index < Limit;
+            return Index < (Limit / sizeof(T));
         }
-        BE_FORCEINLINE static void SetByte(void* Source, SizeType Limit, SizeType Index, int8 Value)
+        BE_FORCEINLINE static void Set(void* Source, SizeType Limit, SizeType Index, int8 Value)
         {
-            if(CheckByteBoundary(Limit, Index))
+            if(CheckBoundary(Limit, Index))
             {
-                static_cast<int8*>(Source)[Index] = Value;
+                static_cast<T*>(Source)[Index] = Value;
             }
         }
-        BE_FORCEINLINE static int8 GetByte(const void* Source, SizeType Limit, SizeType Index)
+        BE_FORCEINLINE static T Get(const void* Source, SizeType Limit, SizeType Index)
         {
-            if(CheckByteBoundary(Limit, Index))
+            if(CheckBoundary(Limit, Index))
             {
-                return static_cast<const int8*>(Source)[Index];
+                return static_cast<const T*>(Source)[Index];
             }
             return 0;
         }
     };
-    
 };

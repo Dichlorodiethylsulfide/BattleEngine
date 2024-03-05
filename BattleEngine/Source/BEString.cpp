@@ -42,6 +42,11 @@ void BEString::Clear()
     SetSSO(SmallString, true);
 }
 
+bool BEString::IsEmpty() const
+{
+    return !Data;
+}
+
 const CHAR* BEString::CStr() const
 {
     return
@@ -63,11 +68,11 @@ SizeType BEString::GetLength(const CHAR* CString)
 void BEString::SetSSO(SSO& SmallString, bool bIsSSO)
 {
     // Find the last byte in the SmallString and set it to True or False
-    BEMemory::BEByteOperations::SetByte(&SmallString, sizeof(SSO),  31, bIsSSO ? 1 : 0);
+    BEMemory::BEByteOperations<int8>::Set(&SmallString, sizeof(SSO),  sizeof(SSO) - 1, bIsSSO ? 1 : 0);
 }
 
 bool BEString::IsSSO(const SSO& SmallString)
 {
     // Find the last byte in the SmallString and return it
-    return BEMemory::BEByteOperations::GetByte(&SmallString, sizeof(SSO), 31);
+    return BEMemory::BEByteOperations<int8>::Get(&SmallString, sizeof(SSO), sizeof(SSO) - 1);
 }
