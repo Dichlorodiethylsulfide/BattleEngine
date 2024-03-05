@@ -21,6 +21,13 @@ using uint32 = unsigned int;
 using uint64 = unsigned long long;
 using ansi = char;
 using unicode = wchar_t;
+using SizeType = uint64;
+
+struct uint128
+{
+    uint64 High;
+    uint64 Low;
+};
 
 #if 1
 #define TEXT(x) x
@@ -30,11 +37,15 @@ using CHAR = ansi;
 using CHAR = unicode;
 #endif
 
+template<class>
+struct TGetIntLimit
+{
+    BE_FORCEINLINE static SizeType GetMin() { return 0; }
+    BE_FORCEINLINE static SizeType GetMax() { return 0; }
+};
+
 template<class, class>
 struct TIsSame { enum { Value = false }; };
-
-template<class TA>
-struct TIsSame<TA, TA> { enum { Value = true }; };
 
 template<class>
 struct TIsArithmetic { enum { Value = false };};
@@ -131,7 +142,7 @@ constexpr bool bRequiresTrue = Value;
 
 #define BE_T_VALID_TRAIT(trait, type) template <> struct trait<type> { enum { Value = true }; };
 #define BE_T_VALID_CV_TRAIT(trait, cv) template <typename T> struct trait<cv T> { enum { Value = trait<T>::Value }; };
-#define BE_T_VALID_ALL_CV_TRAIT(trait, ptr) \
+#define BE_T_VALID_ALL_CV_TRAIT(trait) \
       BE_T_VALID_CV_TRAIT(trait, const) \
       BE_T_VALID_CV_TRAIT(trait, volatile) \
       BE_T_VALID_CV_TRAIT(trait, const volatile)
@@ -144,12 +155,40 @@ struct trait<sub> \
 using Type = res; \
 };
 
+#define T_INT_LIMIT_TYPE(type, min, max) \
+    template <> struct TGetIntLimit<type> \
+    { \
+        BE_FORCEINLINE static type GetMin() { return min; }\
+        BE_FORCEINLINE static type GetMax() { return max; }\
+    };
+
 #define BE_T_ASSERT_TRAIT(...) static_assert(__VA_ARGS__::Value, "Failed to substitute type in " BE_STRINGIFY(__VA_ARGS__));
+
+#define BE_DEFAULT_CONSTRUCTION(type) \
+    type() = default; \
+    type(const type&) = default; \
+    type(type&&) = default;
+
+#define BE_DEFAULT_ASSIGNMENT(type) \
+    type operator=(const type&) = default; \
+    type operator=(type&&) = default;
+
+#define BE_DISABLE_CONSTRUCTION(type) \
+    type##(const type&) = delete; \
+    type##(type&&) = delete;
+
+#define BE_DISABLE_ASSIGNMENT(type) \
+    type operator=(const type&) = delete; \
+    type operator=(type&&) = delete;
 
 //
 // Type trait substitutions
 //
 // Set valid traits
+
+template<class TA>
+struct TIsSame<TA, TA> { enum { Value = true }; };
+
 BE_T_VALID_TRAIT(TIsArithmetic, ansi)
 BE_T_VALID_TRAIT(TIsArithmetic, unicode)
 BE_T_VALID_TRAIT(TIsArithmetic, int8)
@@ -237,6 +276,15 @@ BE_T_CHANGE_TRAIT(TAddVolatile, const volatile T, const volatile T)
 BE_T_CHANGE_TRAIT(TAddPointer, T*, T*)
 BE_T_CHANGE_TRAIT(TAddPointer, const T, const T*)
 BE_T_CHANGE_TRAIT(TAddPointer, const volatile T, const volatile T*)
+
+T_INT_LIMIT_TYPE(uint8, 0, 0xffui8)
+T_INT_LIMIT_TYPE(int8, (-127i8 - 1), 127i8)
+T_INT_LIMIT_TYPE(uint16, 0, 0xffffui16)
+T_INT_LIMIT_TYPE(int16, (-32767i16 - 1), 32767i16)
+T_INT_LIMIT_TYPE(uint32, 0, 0xffffffffui32)
+T_INT_LIMIT_TYPE(int32, (-2147483647i32 - 1), 2147483647i32)
+T_INT_LIMIT_TYPE(uint64, 0, 0xffffffffffffffffui64)
+T_INT_LIMIT_TYPE(int64, (-9223372036854775807i64 - 1), 9223372036854775807i64)
 //
 // Type trait asserts
 //
