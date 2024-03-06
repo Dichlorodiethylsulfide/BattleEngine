@@ -16,7 +16,7 @@ struct BEMemory
         {
             return Index < (Limit / sizeof(T));
         }
-        BE_FORCEINLINE static void Set(void* Source, SizeType Limit, SizeType Index, int8 Value)
+        BE_FORCEINLINE static void Set(void* Source, SizeType Limit, SizeType Index, T Value)
         {
             if(CheckBoundary(Limit, Index))
             {

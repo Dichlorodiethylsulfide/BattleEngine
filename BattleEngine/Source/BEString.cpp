@@ -5,8 +5,7 @@
 
 BEString::BEString()
 {
-    SmallString = {};
-    SetSSO(SmallString, true);
+    SmallString = {true, 0};
 }
 
 BEString::BEString(const CHAR* CString)
@@ -46,8 +45,7 @@ BEString& BEString::operator=(const BEString& String)
 BEString& BEString::operator=(BEString&& String) noexcept
 {
     SmallString = String.SmallString;
-    String.SmallString = {};
-    SetSSO(String.SmallString, true);
+    String.SmallString = {true, 0};
     return *this;
 }
 
@@ -55,26 +53,37 @@ void BEString::Clear()
 {
     if(!IsEmpty())
     {
-        if(!IsSSO(SmallString))
+        if(!SmallString.IsSSO())
         {
-            BE::MainAllocator.Free(Data);
+            BE::MainAllocator.Free(Data.Pointer);
         }
-        SmallString = {};
-        SetSSO(SmallString, true);
+        SmallString = {true, 0};
     }
 }
 
 bool BEString::IsEmpty() const
 {
-    return !Data;
+    return !Data.Pointer;
+}
+
+uint64 BEString::GetLength() const
+{
+    return SmallString.IsSSO() ?
+        SmallString.GetLength() :
+        Data.Length;
 }
 
 const CHAR* BEString::CStr() const
 {
     return
-        IsSSO(SmallString) ?
+        SmallString.IsSSO() ?
         SmallString.AsCString() :
-        Data;
+        Data.Pointer;
+}
+
+bool BEString::GetIsSSO() const
+{
+    return SmallString.IsSSO();
 }
 
 SizeType BEString::GetLength(const CHAR* CString)
@@ -90,29 +99,19 @@ SizeType BEString::GetLength(const CHAR* CString)
 void BEString::BuildBEString(const CHAR* CString, BEString& ThisString)
 {
     SizeType Length = GetLength(CString);
-    ThisString.SmallString = {}; // clear data
-    if(Length > sizeof(SSO) - 2) // last byte is SSO flag, second last byte is '\0'
+    ThisString.SmallString = { true, 0 }; // clear data
+    if(Length > sizeof(SmallStringStack) - SmallStringStack::EndBytePositionMax)
+        // last byte is SmallStringStack flag, second last byte is length, third last byte is '\0'
     {
-        SetSSO(ThisString.SmallString, false);
+        ThisString.SmallString.SetSSO(false);
         Length++; // include last character
-        ThisString.Data = static_cast<CHAR*>(BE::MainAllocator.TryMalloc(Length));
-        BEMemory::MemCopy(ThisString.Data, CString, Length);
+        ThisString.Data = { static_cast<CHAR*>(BE::MainAllocator.TryMalloc(Length)), Length };
+        BEMemory::MemCopy(ThisString.Data.Pointer, CString, Length);
     }
     else
     {
         BEMemory::MemCopy(&ThisString.SmallString, CString, Length);
-        SetSSO(ThisString.SmallString, true);
+        ThisString.SmallString.SetSSO(true);
+        ThisString.SmallString.SetLength(static_cast<uint8>(Length));
     }
-}
-
-void BEString::SetSSO(SSO& SmallString, bool bIsSSO)
-{
-    // Find the last byte in the SmallString and set it to True or False
-    BEMemory::BEByteOperations<int8>::Set(&SmallString, sizeof(SSO),  sizeof(SSO) - 1, bIsSSO ? 1 : 0);
-}
-
-bool BEString::IsSSO(const SSO& SmallString)
-{
-    // Find the last byte in the SmallString and return it
-    return BEMemory::BEByteOperations<int8>::Get(&SmallString, sizeof(SSO), sizeof(SSO) - 1);
 }
