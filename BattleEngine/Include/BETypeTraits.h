@@ -107,6 +107,18 @@ struct TRemovePointer
 };
 
 template<typename T>
+struct TRemoveLReference
+{
+    using Type = T;
+};
+
+template<typename T>
+struct TRemoveRReference
+{
+    using Type = T;
+};
+
+template<typename T>
 struct TAddConst
 {
     using Type = const T;
@@ -122,6 +134,18 @@ template<typename T>
 struct TAddPointer
 {
     using Type = T*;
+};
+
+template<typename T>
+struct TAddLReference
+{
+    using Type = T&;
+};
+
+template<typename T>
+struct TAddRReference
+{
+    using Type = T&&;
 };
 
 #if __cplusplus < 20200
@@ -265,6 +289,14 @@ BE_T_CHANGE_TRAIT(TRemovePointer, T*, T)
 BE_T_CHANGE_TRAIT(TRemovePointer, const T*, const T)
 BE_T_CHANGE_TRAIT(TRemovePointer, const volatile T*, const volatile T)
 
+BE_T_CHANGE_TRAIT(TRemoveLReference, const T&, const T)
+BE_T_CHANGE_TRAIT(TRemoveLReference, volatile T&, volatile T)
+BE_T_CHANGE_TRAIT(TRemoveLReference, const volatile T&, const volatile T)
+
+BE_T_CHANGE_TRAIT(TRemoveRReference, T&&, T)
+BE_T_CHANGE_TRAIT(TRemoveRReference, volatile T&&, volatile T)
+BE_T_CHANGE_TRAIT(TRemoveRReference, const volatile T&&, const volatile T)
+
 BE_T_CHANGE_TRAIT(TAddConst, const T, const T)
 BE_T_CHANGE_TRAIT(TAddConst, volatile T, const volatile T)
 BE_T_CHANGE_TRAIT(TAddConst, const volatile T, const volatile T)
@@ -276,6 +308,14 @@ BE_T_CHANGE_TRAIT(TAddVolatile, const volatile T, const volatile T)
 BE_T_CHANGE_TRAIT(TAddPointer, T*, T*)
 BE_T_CHANGE_TRAIT(TAddPointer, const T, const T*)
 BE_T_CHANGE_TRAIT(TAddPointer, const volatile T, const volatile T*)
+
+BE_T_CHANGE_TRAIT(TAddLReference, const T, const T&)
+BE_T_CHANGE_TRAIT(TAddLReference, volatile T, volatile T&)
+BE_T_CHANGE_TRAIT(TAddLReference, const volatile T, const volatile T&)
+
+BE_T_CHANGE_TRAIT(TAddRReference, const T, const T&&)
+BE_T_CHANGE_TRAIT(TAddRReference, volatile T, volatile T&&)
+BE_T_CHANGE_TRAIT(TAddRReference, const volatile T, const volatile T&&)
 
 T_INT_LIMIT_TYPE(uint8, 0, 0xffui8)
 T_INT_LIMIT_TYPE(int8, (-127i8 - 1), 127i8)
@@ -349,3 +389,12 @@ BE_T_ASSERT_TRAIT(TIsConst<TAddConst<int>::Type>)
 BE_T_ASSERT_TRAIT(TIsVolatile<TAddVolatile<int>::Type>)
 
 BE_T_ASSERT_TRAIT(TIsSame<TAddPointer<int>, TAddPointer<int>>)
+//
+// Function definitions
+//
+template<typename T>
+typename TAddRReference<T>::Type BEMove(typename TAddLReference<T>::Type Object)
+{
+    return static_cast<typename TAddRReference<T>::Type>(Object);
+}
+//
