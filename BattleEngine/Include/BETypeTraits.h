@@ -9,6 +9,8 @@
 
 // Type trait definitions
 #define BE_STRINGIFY(x) #x
+#define BE_CONCAT_IMPL(x, y) x##y
+#define BE_CONCAT(x, y) BE_CONCAT_IMPL(x, y)
 #define BE_FORCEINLINE __forceinline
 
 using int8 = signed char;

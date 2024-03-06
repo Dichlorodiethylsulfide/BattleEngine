@@ -86,9 +86,14 @@ private:
 
     BE_FORCEINLINE void SetLength(SizeType Length)
     {
-        SmallString.IsSSO() ?
-            SmallString.SetLength(static_cast<uint8>(Length)) :
+        if(SmallString.IsSSO())
+        {
+            SmallString.SetLength(static_cast<uint8>(Length));
+        }
+        else
+        {
             Data.Length = Length;
+        }
     }
     
     static void BuildBEString(const CHAR* CString, BEString& ThisString);
