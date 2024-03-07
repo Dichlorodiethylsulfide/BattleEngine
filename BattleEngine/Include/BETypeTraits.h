@@ -150,11 +150,74 @@ struct TAddRReference
     using Type = T&&;
 };
 
+template<bool, class, class>
+struct TChooseType
+{
+    using Type = void;
+};
+
+template<bool, typename T, T, T>
+struct TChooseConstant
+{
+    using Type = void;
+};
+
+template<class TA, class TB>
+struct TChooseType<true, TA, TB> { using Type = TA; };
+
+template<class TA, class TB>
+struct TChooseType<false, TA, TB> { using Type = TB; };
+
+template<class TType, TType TA, TType TB>
+struct TChooseConstant<true, TType, TA, TB> { enum { Value = TA }; };
+
+template<class TType, TType TA, TType TB>
+struct TChooseConstant<false, TType, TA, TB> { enum { Value = TB }; };
+
+template<class T, uint64 Count>
+struct TStackElements { T Data[Count]; };
+
+template<uint64 Count>
+using TStackBlock = TStackElements<uint8, Count>;
+
+template<typename...> struct TUnion;
+
+template<class T, class TT>
+struct TUnion<T, TT>
+{
+    // ReSharper disable once CppPossiblyUninitializedMember -> Fails build if initialized
+    TUnion() {}
+    union
+    {
+        T Data;
+        TT Other;
+    };
+
+    using DataType = T;
+    using OtherType = TT;
+};
+
+template<class T, class ... TTypes>
+struct TUnion<T, TTypes...>
+{
+    // ReSharper disable once CppPossiblyUninitializedMember -> Fails build if initialized
+    TUnion() {}
+    union
+    {
+        T Data;
+        TUnion<TTypes...> Other;
+    };
+
+    using DataType = T;
+    using OtherType = decltype(Other);
+};
+
 #if __cplusplus < 20200
 #define BE_REQUIRES
 #error Code was not compiled prior to C++ 20
 #else
 /*
+ * Follows the same style as UE_REQUIRES
  * template<typename T BE_REQUIRES(sizeof(T) >= 4)> void Function()
  */
 template<bool Value>
@@ -391,11 +454,15 @@ BE_T_ASSERT_TRAIT(TIsConst<TAddConst<int>::Type>)
 BE_T_ASSERT_TRAIT(TIsVolatile<TAddVolatile<int>::Type>)
 
 BE_T_ASSERT_TRAIT(TIsSame<TAddPointer<int>, TAddPointer<int>>)
+
+BE_T_ASSERT_TRAIT(TIsPointer<decltype(TUnion<int*, int>().Data)>);
+BE_T_ASSERT_TRAIT(TIsPointer<decltype(TUnion<int, int*>().Other)>);
+BE_T_ASSERT_TRAIT(TIsPointer<decltype(TUnion<int, int, int*>().Other.Other)>);
 //
 // Function definitions
 //
 template<typename T>
-typename TAddRReference<T>::Type BEMove(typename TAddLReference<T>::Type Object)
+BE_FORCEINLINE typename TAddRReference<T>::Type BEMove(typename TAddLReference<T>::Type Object)
 {
     return static_cast<typename TAddRReference<T>::Type>(Object);
 }

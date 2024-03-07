@@ -76,23 +76,19 @@ private:
         CHAR* Pointer;
         SizeType Length;
     };
-    union
-    {
-        SmallStringStack SmallString;
-        StringHeap Data;
-    };
+    TUnion<SmallStringStack, StringHeap> Union;
     static_assert(sizeof(SmallStringStack) == 32, "Do not modify the size of the SmallStringOptimisation type");
     static_assert(sizeof(StringHeap) <= sizeof(SmallStringStack), "StringHeap must be smaller than or equal to the size of SmallStringOptimisation");
 
     BE_FORCEINLINE void SetLength(SizeType Length)
     {
-        if(SmallString.IsSSO())
+        if(Union.Data.IsSSO())
         {
-            SmallString.SetLength(static_cast<uint8>(Length));
+            Union.Data.SetLength(static_cast<uint8>(Length));
         }
         else
         {
-            Data.Length = Length;
+            Union.Other.Length = Length;
         }
     }
     
