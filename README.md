@@ -1,0 +1,1 @@
+Currently the main focus for development. Looking at the Unreal Engine source code for inspiration (and naming coventions!) as well as looking to implement my own RHI for rendering. Working with SDL is good but I'd like more control over how I am handling textures and buffers.
