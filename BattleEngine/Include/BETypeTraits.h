@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+// All definitions in BETypeTraits.h will be moved into appropriate files / folders when ready
+
 /* Naming Conventions
  * - BE for Objects
  * - T for templates
@@ -174,11 +176,71 @@ struct TChooseConstant<true, TType, TA, TB> { enum { Value = TA }; };
 template<class TType, TType TA, TType TB>
 struct TChooseConstant<false, TType, TA, TB> { enum { Value = TB }; };
 
-template<class T, uint64 Count>
+using Null = decltype(nullptr);
+
+class BEObject;
+
+template<typename T>
+struct TObjectPtr
+{
+    static_assert(!TIsDerivedFrom<T, BEObject>::Value, "T cannot be a BEObject, please use BEObjectPtr");
+    
+    TObjectPtr(Null)
+        : Pointer(nullptr)
+    {
+    }
+
+    TObjectPtr()
+        : TObjectPtr(nullptr)
+    {
+    }
+
+    TObjectPtr(T* Ptr)
+        : Pointer(Ptr)
+    {
+    }
+
+    mutable T* Pointer;
+
+    BE_FORCEINLINE bool IsValid() const
+    {
+        return Pointer != nullptr;
+    }
+
+    BE_FORCEINLINE explicit operator bool() const
+    {
+        return IsValid();
+    }
+
+    BE_FORCEINLINE const T* Get() const
+    {
+        return Pointer;
+    }
+
+    BE_FORCEINLINE const T& GetRef() const
+    {
+        // TObjectRef ?
+        return *Pointer;
+    }
+};
+
+struct BEObjectPtr
+{
+    BEObject* Pointer;
+};
+
+template<class T, SizeType Count>
 struct TStackElements { T Data[Count]; };
 
-template<uint64 Count>
+template<SizeType Count>
 using TStackBlock = TStackElements<uint8, Count>;
+
+template<class T>
+struct THeapPointer // all heap pointers are 16 bytes
+{
+    TObjectPtr<T> Pointer;
+    SizeType Length; // how many items are available at 'Pointer'
+};
 
 template<typename...> struct TUnion;
 
@@ -251,7 +313,10 @@ using Type = res; \
         BE_FORCEINLINE static type GetMax() { return max; }\
     };
 
-#define BE_T_ASSERT_TRAIT(...) static_assert(__VA_ARGS__::Value, "Failed to substitute type in " BE_STRINGIFY(__VA_ARGS__));
+#define BE_T_ASSERT(assertion_msg, ...) static_assert(__VA_ARGS__, assertion_msg);
+#define BE_T_ASSERT_TRAIT(...) BE_T_ASSERT("Failed to substitute type in " BE_STRINGIFY((__VA_ARGS__)), __VA_ARGS__::Value);
+
+#define BE_T_ASSERT_HEAP_PTR(type) BE_T_ASSERT("Heap Pointer must be 16 bytes", sizeof(THeapPointer<type>) == 16);
 
 #define BE_DEFAULT_CONSTRUCTION(type) \
     type() = default; \
@@ -458,6 +523,10 @@ BE_T_ASSERT_TRAIT(TIsSame<TAddPointer<int>, TAddPointer<int>>)
 BE_T_ASSERT_TRAIT(TIsPointer<decltype(TUnion<int*, int>().Data)>);
 BE_T_ASSERT_TRAIT(TIsPointer<decltype(TUnion<int, int*>().Other)>);
 BE_T_ASSERT_TRAIT(TIsPointer<decltype(TUnion<int, int, int*>().Other.Other)>);
+
+BE_T_ASSERT_HEAP_PTR(CHAR)
+BE_T_ASSERT_HEAP_PTR(uint32)
+BE_T_ASSERT_HEAP_PTR(SizeType)
 //
 // Function definitions
 //
