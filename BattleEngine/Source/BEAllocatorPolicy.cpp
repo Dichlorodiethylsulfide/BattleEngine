@@ -4,7 +4,7 @@
 
 #include "BEMemory.h"
 
-void* BEMainAllocatorPolicy::Malloc(SizeType Bytes, SizeType Alignment) const
+void* BEHeapAllocatorPolicy::Malloc(SizeType Bytes, SizeType Alignment) const
 {
     void* Block = _aligned_malloc(Bytes, Alignment);
     if(!Block)
@@ -15,13 +15,13 @@ void* BEMainAllocatorPolicy::Malloc(SizeType Bytes, SizeType Alignment) const
     return Block;
 }
 
-void* BEMainAllocatorPolicy::TryMalloc(SizeType Bytes, SizeType Alignment) const
+void* BEHeapAllocatorPolicy::TryMalloc(SizeType Bytes, SizeType Alignment) const
 {
     BEMemory::CheckMaxAlloc(Bytes);
     return Malloc(Bytes, Alignment);
 }
 
-void* BEMainAllocatorPolicy::Realloc(void* Block, SizeType Bytes, SizeType Alignment) const
+void* BEHeapAllocatorPolicy::Realloc(void* Block, SizeType Bytes, SizeType Alignment) const
 {
     void* ReBlock = _aligned_realloc(Block, Bytes, Alignment);
     if(!ReBlock)
@@ -32,13 +32,13 @@ void* BEMainAllocatorPolicy::Realloc(void* Block, SizeType Bytes, SizeType Align
     return ReBlock;
 }
 
-void* BEMainAllocatorPolicy::TryRealloc(void* Block, SizeType Bytes, SizeType Alignment) const
+void* BEHeapAllocatorPolicy::TryRealloc(void* Block, SizeType Bytes, SizeType Alignment) const
 {
     BEMemory::CheckMaxAlloc(Bytes);
     return Realloc(Block, Bytes, Alignment);
 }
 
-void BEMainAllocatorPolicy::Free(void* Block) const
+void BEHeapAllocatorPolicy::Free(void* Block) const
 {
     if(Block)
     {
@@ -46,7 +46,13 @@ void BEMainAllocatorPolicy::Free(void* Block) const
     }
 }
 
-SizeType BEMainAllocatorPolicy::GetAllocationSize(void* Block, SizeType Alignment) const
+SizeType BEHeapAllocatorPolicy::GetAllocationSize(void* Block, SizeType Alignment) const
 {
     return _aligned_msize(Block, Alignment, 0);
+}
+
+const BEHeapAllocatorPolicy MainAllocator = BEHeapAllocatorPolicy();
+const BEAllocatorPolicy& GetAllocator()
+{
+    return MainAllocator;
 }

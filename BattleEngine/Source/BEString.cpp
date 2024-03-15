@@ -3,10 +3,7 @@
 #include "BEMemory.h"
 #include "BEAllocatorPolicy.h"
 
-BEString::BEString()
-{
-    Union.Data = {true, 0};
-}
+BEString::BEString() = default;
 
 BEString::BEString(const CHAR* CString)
 {
@@ -44,46 +41,34 @@ BEString& BEString::operator=(const BEString& String)
 
 BEString& BEString::operator=(BEString&& String) noexcept
 {
-    Union.Data = String.Union.Data;
-    String.Union.Data = {true, 0};
+    InternalStringStack.InternalUnion.Data = String.InternalStringStack.InternalUnion.Data;
+    String.InternalStringStack.Clear();
     return *this;
 }
 
 void BEString::Clear()
 {
-    if(!IsEmpty())
-    {
-        if(!Union.Data.IsSSO())
-        {
-            BE::MainAllocator.Free(Union.Other.Pointer);
-        }
-        Union.Data = {true, 0};
-    }
+    InternalStringStack.Clear();
 }
 
 bool BEString::IsEmpty() const
 {
-    return !Union.Other.Pointer;
+    return InternalStringStack.IsEmpty();
 }
 
 uint64 BEString::GetLength() const
 {
-    return Union.Data.IsSSO() ?
-        Union.Data.GetLength() :
-        Union.Other.Length;
+    return InternalStringStack.GetLength();
 }
 
 const CHAR* BEString::CStr() const
 {
-    return
-        Union.Data.IsSSO() ?
-        Union.Data.AsCString() :
-        Union.Other.Pointer;
+    return InternalStringStack.GetReinterpretedPointer();
 }
 
 bool BEString::GetIsSSO() const
 {
-    return Union.Data.IsSSO();
+    return InternalStringStack.GetIsStack();
 }
 
 SizeType BEString::GetLength(const CHAR* CString)
@@ -98,20 +83,6 @@ SizeType BEString::GetLength(const CHAR* CString)
 
 void BEString::BuildBEString(const CHAR* CString, BEString& ThisString)
 {
-    SizeType Length = GetLength(CString);
-    ThisString.Union.Data = { true, 0 }; // clear data
-    if(Length > sizeof(SmallStringStack) - SmallStringStack::EndBytePositionMax)
-        // last byte is SmallStringStack flag, second last byte is length, third last byte is '\0'
-    {
-        ThisString.Union.Data.SetSSO(false);
-        Length++; // include last character
-        ThisString.Union.Other = { static_cast<CHAR*>(BE::MainAllocator.TryMalloc(Length)), Length };
-        BEMemory::MemCopy(ThisString.Union.Other.Pointer, CString, Length);
-    }
-    else
-    {
-        BEMemory::MemCopy(&ThisString.Union.Data, CString, Length);
-        ThisString.Union.Data.SetSSO(true);
-        ThisString.Union.Data.SetLength(static_cast<uint8>(Length));
-    }
+    SizeType Length = GetLength(CString) + 1;
+    ThisString.InternalStringStack.SetElements(CString, Length);
 }
