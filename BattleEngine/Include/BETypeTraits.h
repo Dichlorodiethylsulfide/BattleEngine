@@ -222,6 +222,27 @@ struct TObjectPtr
         // TObjectRef ?
         return *Pointer;
     }
+
+    BE_FORCEINLINE T* Get()
+    {
+        return Pointer;
+    }
+
+    BE_FORCEINLINE T& GetRef()
+    {
+        // TObjectRef ?
+        return *Pointer;
+    }
+
+    BE_FORCEINLINE T* operator->()
+    {
+       return Get(); 
+    }
+    
+    BE_FORCEINLINE T& operator*()
+    {
+        return GetRef();
+    }
 };
 
 struct BEObjectPtr
@@ -317,6 +338,15 @@ using Type = res; \
 #define BE_T_ASSERT_TRAIT(...) BE_T_ASSERT("Failed to substitute type in " BE_STRINGIFY((__VA_ARGS__)), __VA_ARGS__::Value);
 
 #define BE_T_ASSERT_HEAP_PTR(type) BE_T_ASSERT("Heap Pointer must be 16 bytes", sizeof(THeapPointer<type>) == 16);
+
+#define BE_LIKELY(x) (!!(x))
+#define BE_UNLIKELY(x) (!(BE_LIKELY(x)))
+
+#define BE_CHECK(x) \
+    if(BE_LIKELY(x)) \
+    { \
+        __debugbreak(); \
+    }
 
 #define BE_DEFAULT_CONSTRUCTION(type) \
     type() = default; \
