@@ -9,7 +9,7 @@ struct BEMemory
     static void OnOutOfMemory();
     static void CheckMaxAlloc(SizeType Bytes);
 
-    template<typename T BE_REQUIRES(TIsArithmetic<T>::Value)>
+    template<typename T BE_REQUIRES(TIsArithmetic<T>::Value || TIsPointer<T>::Value)>
     struct BEByteOperations
     {
         BE_FORCEINLINE static bool CheckBoundary(SizeType Limit, SizeType Index)
