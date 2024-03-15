@@ -57,9 +57,10 @@ extern const BEAllocatorPolicy& GetAllocator();
 template<typename T>
 struct BESmallObjectOptimizedStack
 {
-    TUnion<TStackBlock<BESmallAllocationAmount::Value>, THeapPointer<T>> InternalUnion;
-
-    using Type = BESmallObjectOptimizedStack;
+    using UnionType = TUnion<TStackBlock<BESmallAllocationAmount::Value>, THeapPointer<T>>;
+    using StackType = BESmallObjectOptimizedStack;
+    
+    mutable UnionType InternalUnion;
     
     enum // End Byte Position - EnumValue
     {
@@ -69,6 +70,42 @@ struct BESmallObjectOptimizedStack
     };
 
     BESmallObjectOptimizedStack()
+        : InternalUnion()
+    {
+    }
+
+    BESmallObjectOptimizedStack(const T* Elements, SizeType Length)
+        : InternalUnion()
+    {
+        SetElements(Elements, Length);
+    }
+
+    BESmallObjectOptimizedStack(const BESmallObjectOptimizedStack& Other)
+    {
+        *this = Other;
+    }
+
+    BESmallObjectOptimizedStack(BESmallObjectOptimizedStack&& Other) noexcept
+    {
+        *this = BEMove<StackType>(Other);
+    }
+
+    StackType& operator=(const StackType& Other)
+    {
+        Clear();
+        SetElements(Other.GetReinterpretedPointer(), Other.GetLength());
+        return *this;
+    }
+
+    StackType& operator=(StackType&& Other) noexcept
+    {
+        Clear();
+        InternalUnion = BEMove<UnionType>(Other.InternalUnion);
+        Other.InternalUnion = {};
+        return *this;
+    }
+
+    ~BESmallObjectOptimizedStack()
     {
         Clear();
     }
@@ -76,7 +113,7 @@ struct BESmallObjectOptimizedStack
     BE_FORCEINLINE static constexpr uint64 GetActualSizeLimit()
     {
         // We can contain up to 'Data' bytes (64) but are limited to 64 - EndBytePositionMax because the last bytes are used for flags + buffers
-        return sizeof(Type) - EndBytePositionMax;
+        return sizeof(StackType) - EndBytePositionMax;
     }
 
     BE_FORCEINLINE bool IsEmpty() const
@@ -84,15 +121,25 @@ struct BESmallObjectOptimizedStack
         return GetLength() == 0;
     }
 
+    BE_FORCEINLINE bool IsAllocated() const
+    {
+        // The Stack is always considered allocated so just check the pointer is valid
+        return GetIsStack() || InternalUnion.Other.Pointer.IsValid();
+    }
+
     BE_FORCEINLINE void Clear()
     {
-        if(!GetIsStack())
+        if(!IsAllocated())
         {
-            // Change -> cannot guarantee allocator in the future, move to ObjectPtr?
-            GetAllocator().Free(InternalUnion.Other.Pointer.Get());
+            T* Pointer = InternalUnion.Other.Pointer.Get();
+            if(!GetIsStack() && Pointer)
+            {
+                // Change -> cannot guarantee allocator in the future, move to ObjectPtr?
+                GetAllocator().Free(Pointer);
+            }
+            BEMemory::MemZero(this, sizeof(StackType));
+            SetIsStack(true);
         }
-        BEMemory::MemZero(this, sizeof(Type));
-        SetIsStack(true);
     }
 
     // Might move this logic to THeapPointer (re-implemented as TPointer to hide raw pointers for safety)
@@ -113,12 +160,12 @@ struct BESmallObjectOptimizedStack
 
     BE_FORCEINLINE void SetIsStack(bool bIsStack)
     {
-        BEMemory::BEByteOperations<uint8>::Set(this, sizeof(Type),  sizeof(Type) - IsStack, bIsStack ? 1 : 0);
+        BEMemory::BEByteOperations<uint8>::Set(this, sizeof(StackType),  sizeof(StackType) - IsStack, bIsStack ? 1 : 0);
     }
 
     BE_FORCEINLINE bool GetIsStack() const
     {
-        return BEMemory::BEByteOperations<uint8>::Get(this, sizeof(Type), sizeof(Type) - IsStack);
+        return BEMemory::BEByteOperations<uint8>::Get(this, sizeof(StackType), sizeof(StackType) - IsStack);
     }
 
     BE_FORCEINLINE void SetLength(SizeType Length)
@@ -130,7 +177,7 @@ struct BESmallObjectOptimizedStack
                 // Cannot set the Stack to contain more elements than is available in 64 bytes
                 __debugbreak();
             }
-            BEMemory::BEByteOperations<uint8>::Set(this, sizeof(Type),  sizeof(Type) - BESmallObjectOptimizedStack::Length, static_cast<uint8>(Length));
+            BEMemory::BEByteOperations<uint8>::Set(this, sizeof(StackType),  sizeof(StackType) - BESmallObjectOptimizedStack::Length, static_cast<uint8>(Length));
         }
         else
         {
@@ -141,7 +188,7 @@ struct BESmallObjectOptimizedStack
     BE_FORCEINLINE SizeType GetLength() const
     {
         return GetIsStack() ?
-            BEMemory::BEByteOperations<uint8>::Get(this, sizeof(Type), sizeof(Type) - Length) :
+            BEMemory::BEByteOperations<uint8>::Get(this, sizeof(StackType), sizeof(StackType) - Length) :
             InternalUnion.Other.Length;
     }
 

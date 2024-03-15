@@ -1,9 +1,9 @@
 ﻿#include "BEString.h"
 
-#include "BEMemory.h"
-#include "BEAllocatorPolicy.h"
-
-BEString::BEString() = default;
+BEString::BEString()
+{
+    *this = "";
+}
 
 BEString::BEString(const CHAR* CString)
 {
@@ -20,55 +20,31 @@ BEString::BEString(BEString&& String) noexcept
     *this = BEMove<BEString>(String);
 }
 
-BEString::~BEString()
-{
-    Clear();
-}
-
 BEString& BEString::operator=(const CHAR* CString)
 {
     Clear();
-    BuildBEString(CString, *this);
+    const SizeType Length = GetLength(CString) + 1;
+    InternalStack = BESmallObjectOptimizedStack(CString, Length);
     return *this;
 }
 
 BEString& BEString::operator=(const BEString& String)
 {
     Clear();
-    BuildBEString(String.CStr(), *this);
+    InternalStack = BESmallObjectOptimizedStack(String.CStr(), String.InternalStack.GetLength());
     return *this;
 }
 
 BEString& BEString::operator=(BEString&& String) noexcept
 {
-    InternalStringStack.InternalUnion.Data = String.InternalStringStack.InternalUnion.Data;
-    String.InternalStringStack.Clear();
+    InternalStack = BEMove<BESmallObjectOptimizedStack<CHAR>>(String.InternalStack);
+    String.InternalStack.Clear();
     return *this;
-}
-
-void BEString::Clear()
-{
-    InternalStringStack.Clear();
-}
-
-bool BEString::IsEmpty() const
-{
-    return InternalStringStack.IsEmpty();
-}
-
-uint64 BEString::GetLength() const
-{
-    return InternalStringStack.GetLength();
 }
 
 const CHAR* BEString::CStr() const
 {
-    return InternalStringStack.GetReinterpretedPointer();
-}
-
-bool BEString::GetIsSSO() const
-{
-    return InternalStringStack.GetIsStack();
+    return InternalStack.GetReinterpretedPointer();
 }
 
 SizeType BEString::GetLength(const CHAR* CString)
@@ -79,10 +55,4 @@ SizeType BEString::GetLength(const CHAR* CString)
         Length++;
     }
     return Length;
-}
-
-void BEString::BuildBEString(const CHAR* CString, BEString& ThisString)
-{
-    SizeType Length = GetLength(CString) + 1;
-    ThisString.InternalStringStack.SetElements(CString, Length);
 }

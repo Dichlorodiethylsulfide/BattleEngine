@@ -295,6 +295,22 @@ struct TUnion<T, TTypes...>
     using OtherType = decltype(Other);
 };
 
+// All interfaces should be considered IInterfaces
+class IInterface
+{
+};
+
+class ICollection : IInterface
+{
+public:
+    ICollection() {}
+    virtual ~ICollection() {}
+    virtual bool IsEmpty() const = 0;
+    virtual SizeType Length() const = 0;
+    virtual void Clear() = 0;
+};
+//
+
 #if __cplusplus < 20200
 #define BE_REQUIRES
 #error Code was not compiled prior to C++ 20
@@ -347,6 +363,8 @@ using Type = res; \
     { \
         __debugbreak(); \
     }
+
+#define BE_CHECK_LOG(x, y) BE_CHECK(x) // add logging to this macro
 
 #define BE_DEFAULT_CONSTRUCTION(type) \
     type() = default; \

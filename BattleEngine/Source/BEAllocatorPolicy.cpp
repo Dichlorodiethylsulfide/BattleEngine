@@ -12,6 +12,7 @@ void* BEHeapAllocatorPolicy::Malloc(SizeType Bytes, SizeType Alignment) const
         BEMemory::OnOutOfMemory();
         return nullptr;
     }
+    BEMemory::MemZero(Block, Bytes);
     return Block;
 }
 
