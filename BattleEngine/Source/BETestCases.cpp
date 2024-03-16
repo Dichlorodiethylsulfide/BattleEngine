@@ -3,7 +3,7 @@
 #include "BEObject.h"
 #include "BEString.h"
 #include "BEConsoleIO.h"
-// Use this file to running live test cases
+// Use this file for running live test cases
 
 static TAtomic<SizeType> Assertions = 0;
 static TAtomic<SizeType> Successes = 0;
@@ -28,15 +28,21 @@ struct CustomType
     int Value;
 };
 
+void TestSharedObjects()
+{
+    // Make this its own function to ensure the TSharedObjects are deleted at the end
+    auto Custom = MakeShared<CustomType>();
+    auto CustomPtr = Custom.Get();
+    BE_REQUIRES_TEST(CustomPtr->Value == 0)
+    auto Custom2 = MakeShared<CustomType>(100);
+    auto CustomPtr2 = Custom2.Get();
+    BE_REQUIRES_TEST(CustomPtr2->Value == 100)
+}
+
 int main(int argc, char* argv[])
 {
     // New / Delete
-    auto* Custom = New<CustomType>();
-    BE_REQUIRES_TEST(Custom->Value == 0)
-    Delete(Custom);
-    auto* Custom2 = New<CustomType>(100);
-    BE_REQUIRES_TEST(Custom2->Value == 100)
-    Delete(Custom2);
+    TestSharedObjects();
     // New / Delete
     // BEString
     BEString String("Hello World Hello World Hello");
