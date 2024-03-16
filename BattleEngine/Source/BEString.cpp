@@ -5,7 +5,7 @@ BEString::BEString()
     *this = "";
 }
 
-BEString::BEString(const CHAR* CString)
+BEString::BEString(const Char* CString)
 {
     *this = CString;
 }
@@ -17,12 +17,11 @@ BEString::BEString(const BEString& String)
 
 BEString::BEString(BEString&& String) noexcept
 {
-    *this = BEMove<BEString>(String);
+    *this = BEMove(String);
 }
 
-BEString& BEString::operator=(const CHAR* CString)
+BEString& BEString::operator=(const Char* CString)
 {
-    Clear();
     const SizeType Length = GetLength(CString) + 1;
     InternalStack = BESmallObjectOptimizedStack(CString, Length);
     return *this;
@@ -30,24 +29,22 @@ BEString& BEString::operator=(const CHAR* CString)
 
 BEString& BEString::operator=(const BEString& String)
 {
-    Clear();
     InternalStack = BESmallObjectOptimizedStack(String.CStr(), String.InternalStack.GetLength());
     return *this;
 }
 
 BEString& BEString::operator=(BEString&& String) noexcept
 {
-    InternalStack = BEMove<BESmallObjectOptimizedStack<CHAR>>(String.InternalStack);
-    String.InternalStack.Clear();
+    InternalStack = BEMove(String.InternalStack);
     return *this;
 }
 
-const CHAR* BEString::CStr() const
+const Char* BEString::CStr() const
 {
     return InternalStack.GetReinterpretedPointer();
 }
 
-SizeType BEString::GetLength(const CHAR* CString)
+SizeType BEString::GetLength(const Char* CString)
 {
     SizeType Length = 0;
     while(CString[Length] != '\0' && Length != TGetIntLimit<SizeType>::GetMax())

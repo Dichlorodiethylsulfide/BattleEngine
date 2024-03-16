@@ -40,7 +40,6 @@ template <typename T>
 BEArray<T>& BEArray<T>::operator=(BEArray&& Array) noexcept
 {
     InternalStack = BEMove<BESmallObjectOptimizedStack<T>>(Array.InternalStack);
-    Array.InternalStack = {};
     return *this;
 }
 
@@ -63,7 +62,7 @@ bool BEArray<T>::IsEmpty() const
 }
 
 template <typename T>
-uint64 BEArray<T>::Length() const
+UInt64 BEArray<T>::Length() const
 {
     return InternalStack.GetLength();
 }

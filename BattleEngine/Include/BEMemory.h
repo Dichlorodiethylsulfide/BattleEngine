@@ -1,6 +1,20 @@
 ﻿#pragma once
 #include "BETypeTraits.h"
 
+template<class T, SizeType Count>
+struct TStackElements { T Data[Count]; };
+
+template<SizeType Count>
+using TStackBlock = TStackElements<UInt8, Count>;
+
+template<class T>
+struct THeapPointer // all heap pointers are 16 bytes
+{
+    T* Pointer;
+    SizeType Length; // how many items are available at 'Pointer'
+};
+
+
 struct BEMemory
 {
     static void MemZero(void* Block, SizeType Bytes);

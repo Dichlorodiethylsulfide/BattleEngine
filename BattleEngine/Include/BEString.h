@@ -2,19 +2,19 @@
 
 #include "BEArray.h"
 
-class BEString : public BEArray<CHAR>
+class BEString : public BEArray<Char>
 {
 public:
     BEString();
-    BEString(const CHAR* CString);
+    BEString(const Char* CString);
     BEString(const BEString& String);
     BEString(BEString&& String) noexcept;
     
-    BEString& operator=(const CHAR* CString);
+    BEString& operator=(const Char* CString);
     BEString& operator=(const BEString& String);
     BEString& operator=(BEString&& String) noexcept;
 
-    const CHAR* CStr() const;
+    const Char* CStr() const;
 
-    static SizeType GetLength(const CHAR* CString);
+    static SizeType GetLength(const Char* CString);
 };

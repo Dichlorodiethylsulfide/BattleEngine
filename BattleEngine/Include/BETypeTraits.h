@@ -1,12 +1,13 @@
 ﻿#pragma once
 
 // All definitions in BETypeTraits.h will be moved into appropriate files / folders when ready
+// Avoid at all costs putting includes for other files in this file
 
 /* Naming Conventions
- * - BE for Objects
+ * - BE for BE-specific Objects
+ * - S for non-BEObjects ???
  * - T for templates
  * - E for enums
- * - S for structs
  */
 
 // Type trait definitions
@@ -15,30 +16,32 @@
 #define BE_CONCAT(x, y) BE_CONCAT_IMPL(x, y)
 #define BE_FORCEINLINE __forceinline
 
-using int8 = signed char;
-using int16 = signed short;
-using int32 = signed int;
-using int64 = signed long long;
-using uint8 = unsigned char;
-using uint16 = unsigned short;
-using uint32 = unsigned int;
-using uint64 = unsigned long long;
-using ansi = char;
-using unicode = wchar_t;
-using SizeType = uint64;
+using Int8 = signed char;
+using Int16 = signed short;
+using Int32 = signed int;
+using Int64 = signed long long;
+using UInt8 = unsigned char;
+using UInt16 = unsigned short;
+using UInt32 = unsigned int;
+using UInt64 = unsigned long long;
+using Ansi = char;
+using Unicode = wchar_t;
+using SizeType = UInt64;
+using UIntPtr = UInt64;
+using Null = decltype(nullptr);
 
-struct uint128
+struct UInt128
 {
-    uint64 High;
-    uint64 Low;
+    UInt64 High;
+    UInt64 Low;
 };
 
 #if 1
 #define TEXT(x) x
-using CHAR = ansi;
+using Char = Ansi;
 #else // Unicode
 #define TEXT(x) L ## x
-using CHAR = unicode;
+using Char = Unicode;
 #endif
 
 template<class>
@@ -70,13 +73,13 @@ template<class>
 struct TIsPointer { enum { Value = false }; };
 
 template<class>
-struct TNameOf { BE_FORCEINLINE static CHAR const* GetName() { return TEXT("Unknown"); } };
+struct TNameOf { BE_FORCEINLINE static Char const* GetName() { return TEXT("Unknown"); } };
 
 template<class TDerived, class TBase>
 struct TIsDerivedFrom
 {
-    using No = int8;
-    using Yes = int16;
+    using No = Int8;
+    using Yes = Int16;
 
     static Yes& Test(TBase*);
     static Yes& Test(const TBase*);
@@ -91,6 +94,12 @@ struct TIsConst { enum { Value = false }; };
 
 template<class>
 struct TIsVolatile { enum { Value = false }; };
+
+template<class>
+struct TIsLReference { enum { Value = false }; };
+
+template<class>
+struct TIsRReference { enum { Value = false }; };
 
 template<typename T>
 struct TRemoveConst
@@ -111,13 +120,7 @@ struct TRemovePointer
 };
 
 template<typename T>
-struct TRemoveLReference
-{
-    using Type = T;
-};
-
-template<typename T>
-struct TRemoveRReference
+struct TRemoveReference
 {
     using Type = T;
 };
@@ -176,93 +179,6 @@ struct TChooseConstant<true, TType, TA, TB> { enum { Value = TA }; };
 template<class TType, TType TA, TType TB>
 struct TChooseConstant<false, TType, TA, TB> { enum { Value = TB }; };
 
-using Null = decltype(nullptr);
-
-class BEObject;
-
-template<typename T>
-struct TObjectPtr
-{
-    static_assert(!TIsDerivedFrom<T, BEObject>::Value, "T cannot be a BEObject, please use BEObjectPtr");
-    
-    TObjectPtr(Null)
-        : Pointer(nullptr)
-    {
-    }
-
-    TObjectPtr()
-        : TObjectPtr(nullptr)
-    {
-    }
-
-    TObjectPtr(T* Ptr)
-        : Pointer(Ptr)
-    {
-    }
-
-    mutable T* Pointer;
-
-    BE_FORCEINLINE bool IsValid() const
-    {
-        return Pointer != nullptr;
-    }
-
-    BE_FORCEINLINE explicit operator bool() const
-    {
-        return IsValid();
-    }
-
-    BE_FORCEINLINE const T* Get() const
-    {
-        return Pointer;
-    }
-
-    BE_FORCEINLINE const T& GetRef() const
-    {
-        // TObjectRef ?
-        return *Pointer;
-    }
-
-    BE_FORCEINLINE T* Get()
-    {
-        return Pointer;
-    }
-
-    BE_FORCEINLINE T& GetRef()
-    {
-        // TObjectRef ?
-        return *Pointer;
-    }
-
-    BE_FORCEINLINE T* operator->()
-    {
-       return Get(); 
-    }
-    
-    BE_FORCEINLINE T& operator*()
-    {
-        return GetRef();
-    }
-};
-
-struct BEObjectPtr
-{
-    BEObject* Pointer;
-};
-
-template<class T, SizeType Count>
-struct TStackElements { T Data[Count]; };
-
-template<SizeType Count>
-using TStackBlock = TStackElements<uint8, Count>;
-
-template<class T>
-struct THeapPointer // all heap pointers are 16 bytes
-{
-    TObjectPtr<T> Pointer;
-    SizeType Length; // how many items are available at 'Pointer'
-};
-
 template<typename...> struct TUnion;
 
 template<class T, class TT>
@@ -300,16 +216,25 @@ class IInterface
 {
 };
 
-class ICollection : IInterface
+class IConstCollection : IInterface
+{
+public:
+    IConstCollection() {}
+    virtual ~IConstCollection() {}
+    virtual bool IsEmpty() const = 0;
+    virtual SizeType Length() const = 0;
+};
+
+// All non-constant collections can be considered read-only (constant)
+// However, constant collections cannot be considered read-write (non-constant)
+class ICollection : public IConstCollection
 {
 public:
     ICollection() {}
     virtual ~ICollection() {}
-    virtual bool IsEmpty() const = 0;
-    virtual SizeType Length() const = 0;
     virtual void Clear() = 0;
 };
-//
+// IInterfaces
 
 #if __cplusplus < 20200
 #define BE_REQUIRES
@@ -326,7 +251,7 @@ concept bRequiresTrue = Value;
 
 #define BE_T_EXPOSE_NAME(type) \
     template<> \
-    struct TNameOf<type> { BE_FORCEINLINE static CHAR const* GetName() { return TEXT(BE_STRINGIFY(type)); } };
+    struct TNameOf<type> { BE_FORCEINLINE static Char const* GetName() { return TEXT(BE_STRINGIFY(type)); } };
 
 #define BE_T_VALID_TRAIT(trait, type) template <> struct trait<type> { enum { Value = true }; };
 #define BE_T_VALID_CV_TRAIT(trait, cv) template <typename T> struct trait<cv T> { enum { Value = trait<T>::Value }; };
@@ -354,6 +279,7 @@ using Type = res; \
 #define BE_T_ASSERT_TRAIT(...) BE_T_ASSERT("Failed to substitute type in " BE_STRINGIFY((__VA_ARGS__)), __VA_ARGS__::Value);
 
 #define BE_T_ASSERT_HEAP_PTR(type) BE_T_ASSERT("Heap Pointer must be 16 bytes", sizeof(THeapPointer<type>) == 16);
+#define BE_T_ASSERT_SAME_SIZE(type, type2) BE_T_ASSERT(BE_STRINGIFY(type) " must be the same size as " BE_STRINGIFY(type2), sizeof(type) == sizeof(type2))
 
 #define BE_LIKELY(x) (!!(x))
 #define BE_UNLIKELY(x) (!(BE_LIKELY(x)))
@@ -383,6 +309,8 @@ using Type = res; \
     type operator=(const type&) = delete; \
     type operator=(type&&) = delete;
 
+#define BE_T_DEFINE_TRAIT_TYPES(x) template<typename T> using x##T = typename x##<T>::Type;
+
 //
 // Type trait substitutions
 //
@@ -391,17 +319,17 @@ using Type = res; \
 template<class TA>
 struct TIsSame<TA, TA> { enum { Value = true }; };
 
-BE_T_VALID_TRAIT(TIsArithmetic, ansi)
-BE_T_VALID_TRAIT(TIsArithmetic, unicode)
-BE_T_VALID_TRAIT(TIsArithmetic, int8)
-BE_T_VALID_TRAIT(TIsArithmetic, int16)
-BE_T_VALID_TRAIT(TIsArithmetic, int32)
-BE_T_VALID_TRAIT(TIsArithmetic, int64)
+BE_T_VALID_TRAIT(TIsArithmetic, Ansi)
+BE_T_VALID_TRAIT(TIsArithmetic, Unicode)
+BE_T_VALID_TRAIT(TIsArithmetic, Int8)
+BE_T_VALID_TRAIT(TIsArithmetic, Int16)
+BE_T_VALID_TRAIT(TIsArithmetic, Int32)
+BE_T_VALID_TRAIT(TIsArithmetic, Int64)
 BE_T_VALID_TRAIT(TIsArithmetic, long)
-BE_T_VALID_TRAIT(TIsArithmetic, uint8)
-BE_T_VALID_TRAIT(TIsArithmetic, uint16)
-BE_T_VALID_TRAIT(TIsArithmetic, uint32)
-BE_T_VALID_TRAIT(TIsArithmetic, uint64)
+BE_T_VALID_TRAIT(TIsArithmetic, UInt8)
+BE_T_VALID_TRAIT(TIsArithmetic, UInt16)
+BE_T_VALID_TRAIT(TIsArithmetic, UInt32)
+BE_T_VALID_TRAIT(TIsArithmetic, UInt64)
 BE_T_VALID_TRAIT(TIsArithmetic, unsigned long)
 BE_T_VALID_TRAIT(TIsArithmetic, float)
 BE_T_VALID_TRAIT(TIsArithmetic, double)
@@ -434,24 +362,30 @@ struct TIsVolatile<volatile T> { enum { Value = true } ; };
 
 template<typename T>
 struct TIsVolatile<const volatile T> { enum { Value = true } ; };
+
+template<typename T>
+struct TIsLReference<T&> { enum { Value = true } ; };
+
+template<typename T>
+struct TIsRReference<T&&> { enum { Value = true } ; };
 //
 // Expose names
 //
-BE_T_EXPOSE_NAME(int8)
-BE_T_EXPOSE_NAME(int16)
-BE_T_EXPOSE_NAME(int32)
-BE_T_EXPOSE_NAME(int64)
-BE_T_EXPOSE_NAME(uint8)
-BE_T_EXPOSE_NAME(uint16)
-BE_T_EXPOSE_NAME(uint32)
-BE_T_EXPOSE_NAME(uint64)
+BE_T_EXPOSE_NAME(Int8)
+BE_T_EXPOSE_NAME(Int16)
+BE_T_EXPOSE_NAME(Int32)
+BE_T_EXPOSE_NAME(Int64)
+BE_T_EXPOSE_NAME(UInt8)
+BE_T_EXPOSE_NAME(UInt16)
+BE_T_EXPOSE_NAME(UInt32)
+BE_T_EXPOSE_NAME(UInt64)
 BE_T_EXPOSE_NAME(long)
 BE_T_EXPOSE_NAME(unsigned long)
 BE_T_EXPOSE_NAME(float)
 BE_T_EXPOSE_NAME(double)
 BE_T_EXPOSE_NAME(long double)
-BE_T_EXPOSE_NAME(ansi)
-BE_T_EXPOSE_NAME(unicode)
+BE_T_EXPOSE_NAME(Ansi)
+BE_T_EXPOSE_NAME(Unicode)
 //
 // Change traits depending
 //
@@ -467,13 +401,8 @@ BE_T_CHANGE_TRAIT(TRemovePointer, T*, T)
 BE_T_CHANGE_TRAIT(TRemovePointer, const T*, const T)
 BE_T_CHANGE_TRAIT(TRemovePointer, const volatile T*, const volatile T)
 
-BE_T_CHANGE_TRAIT(TRemoveLReference, const T&, const T)
-BE_T_CHANGE_TRAIT(TRemoveLReference, volatile T&, volatile T)
-BE_T_CHANGE_TRAIT(TRemoveLReference, const volatile T&, const volatile T)
-
-BE_T_CHANGE_TRAIT(TRemoveRReference, T&&, T)
-BE_T_CHANGE_TRAIT(TRemoveRReference, volatile T&&, volatile T)
-BE_T_CHANGE_TRAIT(TRemoveRReference, const volatile T&&, const volatile T)
+BE_T_CHANGE_TRAIT(TRemoveReference, T&&, T)
+BE_T_CHANGE_TRAIT(TRemoveReference, T&, T)
 
 BE_T_CHANGE_TRAIT(TAddConst, const T, const T)
 BE_T_CHANGE_TRAIT(TAddConst, volatile T, const volatile T)
@@ -495,92 +424,47 @@ BE_T_CHANGE_TRAIT(TAddRReference, const T, const T&&)
 BE_T_CHANGE_TRAIT(TAddRReference, volatile T, volatile T&&)
 BE_T_CHANGE_TRAIT(TAddRReference, const volatile T, const volatile T&&)
 
-T_INT_LIMIT_TYPE(uint8, 0, 0xffui8)
-T_INT_LIMIT_TYPE(int8, (-127i8 - 1), 127i8)
-T_INT_LIMIT_TYPE(uint16, 0, 0xffffui16)
-T_INT_LIMIT_TYPE(int16, (-32767i16 - 1), 32767i16)
-T_INT_LIMIT_TYPE(uint32, 0, 0xffffffffui32)
-T_INT_LIMIT_TYPE(int32, (-2147483647i32 - 1), 2147483647i32)
-T_INT_LIMIT_TYPE(uint64, 0, 0xffffffffffffffffui64)
-T_INT_LIMIT_TYPE(int64, (-9223372036854775807i64 - 1), 9223372036854775807i64)
-//
-// Type trait asserts
-//
-BE_T_ASSERT_TRAIT(TIsSame<int8, int8>)
-BE_T_ASSERT_TRAIT(!TIsSame<int8, int16>)
-BE_T_ASSERT_TRAIT(TIsSame<void, void>)
+T_INT_LIMIT_TYPE(UInt8, 0, 0xffui8)
+T_INT_LIMIT_TYPE(Int8, (-127i8 - 1), 127i8)
+T_INT_LIMIT_TYPE(UInt16, 0, 0xffffui16)
+T_INT_LIMIT_TYPE(Int16, (-32767i16 - 1), 32767i16)
+T_INT_LIMIT_TYPE(UInt32, 0, 0xffffffffui32)
+T_INT_LIMIT_TYPE(Int32, (-2147483647i32 - 1), 2147483647i32)
+T_INT_LIMIT_TYPE(UInt64, 0, 0xffffffffffffffffui64)
+T_INT_LIMIT_TYPE(Int64, (-9223372036854775807i64 - 1), 9223372036854775807i64)
 
-BE_T_ASSERT_TRAIT(TIsArithmetic<int8>)
-BE_T_ASSERT_TRAIT(TIsArithmetic<int16>)
-BE_T_ASSERT_TRAIT(!TIsArithmetic<void>)
-BE_T_ASSERT_TRAIT(!TIsArithmetic<void*>)
-
-BE_T_ASSERT_TRAIT(TIsFloatingPoint<float>)
-BE_T_ASSERT_TRAIT(!TIsFloatingPoint<void>)
-
-BE_T_ASSERT_TRAIT(TIsVoid<void>)
-BE_T_ASSERT_TRAIT(!TIsVoid<int8>)
-
-BE_T_ASSERT_TRAIT(TIsFunction<void()>)
-BE_T_ASSERT_TRAIT(TIsFunction<void()>)
-BE_T_ASSERT_TRAIT(TIsFunction<void(int8)>)
-BE_T_ASSERT_TRAIT(TIsFunction<void(int8, int8)>)
-BE_T_ASSERT_TRAIT(TIsFunction<void(int8, int8)>)
-BE_T_ASSERT_TRAIT(TIsFunction<int8()>)
-BE_T_ASSERT_TRAIT(!TIsFunction<int8>)
-
-BE_T_ASSERT_TRAIT(!TIsPointer<int8>)
-BE_T_ASSERT_TRAIT(TIsPointer<int8*>)
-BE_T_ASSERT_TRAIT(TIsPointer<int8**>)
-
-BE_T_ASSERT_TRAIT(TIsConst<const int8>)
-BE_T_ASSERT_TRAIT(!TIsConst<int8>)
-BE_T_ASSERT_TRAIT(!TIsConst<volatile int8>)
-BE_T_ASSERT_TRAIT(TIsConst<const volatile int8>)
-
-BE_T_ASSERT_TRAIT(TIsVolatile<volatile int8>)
-BE_T_ASSERT_TRAIT(!TIsVolatile<int8>)
-BE_T_ASSERT_TRAIT(!TIsVolatile<const int8>)
-BE_T_ASSERT_TRAIT(TIsVolatile<const volatile int8>)
-
-// Macro to stop naming conflicts in case this is included anywhere else
-#define BE_TYPE_TRAIT_DERIVED_TEST(x) BE_Special_Derived_Name_Var_##x
-//
-
-struct BE_TYPE_TRAIT_DERIVED_TEST(A) {};
-struct BE_TYPE_TRAIT_DERIVED_TEST(B) : BE_TYPE_TRAIT_DERIVED_TEST(A) {};
-struct BE_TYPE_TRAIT_DERIVED_TEST(C) {};
-
-BE_T_ASSERT_TRAIT(TIsDerivedFrom<BE_TYPE_TRAIT_DERIVED_TEST(B), BE_TYPE_TRAIT_DERIVED_TEST(A)>)
-BE_T_ASSERT_TRAIT(!TIsDerivedFrom<BE_TYPE_TRAIT_DERIVED_TEST(B), BE_TYPE_TRAIT_DERIVED_TEST(C)>)
-BE_T_ASSERT_TRAIT(!TIsDerivedFrom<BE_TYPE_TRAIT_DERIVED_TEST(A), BE_TYPE_TRAIT_DERIVED_TEST(B)>)
-BE_T_ASSERT_TRAIT(!TIsDerivedFrom<BE_TYPE_TRAIT_DERIVED_TEST(A), BE_TYPE_TRAIT_DERIVED_TEST(C)>)
-
-BE_T_ASSERT_TRAIT(!TIsPointer<TRemovePointer<int*>::Type>)
-BE_T_ASSERT_TRAIT(!TIsConst<TRemoveConst<const int>::Type>)
-BE_T_ASSERT_TRAIT(!TIsVolatile<TRemoveVolatile<volatile int>::Type>)
-
-BE_T_ASSERT_TRAIT(TIsSame<TRemovePointer<int*>, TRemovePointer<int*>>)
-
-BE_T_ASSERT_TRAIT(TIsPointer<TAddPointer<int>::Type>)
-BE_T_ASSERT_TRAIT(TIsConst<TAddConst<int>::Type>)
-BE_T_ASSERT_TRAIT(TIsVolatile<TAddVolatile<int>::Type>)
-
-BE_T_ASSERT_TRAIT(TIsSame<TAddPointer<int>, TAddPointer<int>>)
-
-BE_T_ASSERT_TRAIT(TIsPointer<decltype(TUnion<int*, int>().Data)>);
-BE_T_ASSERT_TRAIT(TIsPointer<decltype(TUnion<int, int*>().Other)>);
-BE_T_ASSERT_TRAIT(TIsPointer<decltype(TUnion<int, int, int*>().Other.Other)>);
-
-BE_T_ASSERT_HEAP_PTR(CHAR)
-BE_T_ASSERT_HEAP_PTR(uint32)
-BE_T_ASSERT_HEAP_PTR(SizeType)
+BE_T_DEFINE_TRAIT_TYPES(TRemoveConst)
+BE_T_DEFINE_TRAIT_TYPES(TRemoveVolatile)
+BE_T_DEFINE_TRAIT_TYPES(TRemovePointer)
+BE_T_DEFINE_TRAIT_TYPES(TRemoveReference)
+BE_T_DEFINE_TRAIT_TYPES(TAddConst)
+BE_T_DEFINE_TRAIT_TYPES(TAddVolatile)
+BE_T_DEFINE_TRAIT_TYPES(TAddPointer)
+BE_T_DEFINE_TRAIT_TYPES(TAddLReference)
+BE_T_DEFINE_TRAIT_TYPES(TAddRReference)
 //
 // Function definitions
 //
 template<typename T>
-BE_FORCEINLINE typename TAddRReference<T>::Type BEMove(typename TAddLReference<T>::Type Object)
+BE_FORCEINLINE constexpr T&& BEForward(TRemoveReferenceT<T>& Object) noexcept
 {
-    return static_cast<typename TAddRReference<T>::Type>(Object);
+    return static_cast<T&&>(Object);
 }
+
+template<typename T>
+BE_FORCEINLINE constexpr T&& BEForward(TRemoveReferenceT<T>&& Object) noexcept
+{
+    BE_T_ASSERT("Bad forward call", !TIsLReference<T>::Value)
+    return static_cast<T&&>(Object);
+}
+
+template<typename T>
+BE_FORCEINLINE constexpr TRemoveReferenceT<T>&& BEMove(T&& Object) noexcept
+{
+    return static_cast<TRemoveReferenceT<T>&&>(Object);
+}
+/*_EXPORT_STD template <class _Ty>
+_NODISCARD _MSVC_INTRINSIC constexpr remove_reference_t<_Ty>&& move(_Ty&& _Arg) noexcept {
+    return static_cast<remove_reference_t<_Ty>&&>(_Arg);
+}*/
 //
