@@ -110,7 +110,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)BattleEngine/Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)BattleEngine/Include;$(SolutionDir)BattleEngine/Source</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

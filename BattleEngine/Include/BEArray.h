@@ -14,7 +14,7 @@ public:
     BEArray& operator=(BEArray&& Array) noexcept;
 
     void Clear() override;
-    bool GetIsSSO() const;
+    bool IsSSO() const;
     bool IsEmpty() const override;
 
     SizeType Length() const override;
@@ -50,7 +50,7 @@ void BEArray<T>::Clear()
 }
 
 template <typename T>
-bool BEArray<T>::GetIsSSO() const
+bool BEArray<T>::IsSSO() const
 {
     return InternalStack.GetIsStack();
 }

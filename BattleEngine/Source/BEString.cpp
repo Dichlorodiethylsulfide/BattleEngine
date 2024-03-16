@@ -36,6 +36,7 @@ BEString& BEString::operator=(const BEString& String)
 BEString& BEString::operator=(BEString&& String) noexcept
 {
     InternalStack = BEMove(String.InternalStack);
+    String = "";
     return *this;
 }
 

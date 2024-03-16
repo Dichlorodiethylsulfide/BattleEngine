@@ -10,6 +10,9 @@
  * - E for enums
  */
 
+#define BE_RUN_TESTS_CASES 1
+
+
 // Type trait definitions
 #define BE_STRINGIFY(x) #x
 #define BE_CONCAT_IMPL(x, y) x##y
