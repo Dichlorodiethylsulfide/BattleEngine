@@ -151,8 +151,7 @@ struct BESmallObjectOptimizedStack
         BEMemory::MemZero(this, sizeof(StackType));
         SetIsStack(true);
     }
-
-    // Might move this logic to THeapPointer (re-implemented as TPointer to hide raw pointers for safety)
+    
     BE_FORCEINLINE T* GetReinterpretedPointer()
     {
         return GetIsStack() ? 
@@ -166,8 +165,7 @@ struct BESmallObjectOptimizedStack
             reinterpret_cast<const T*>(this) :
             InternalUnion.Other.Pointer;
     }
-    // Might move this logic to THeapPointer (re-implemented as TPointer to hide raw pointers for safety)
-
+    
     BE_FORCEINLINE void SetIsStack(bool bIsStack)
     {
         BEMemory::BEByteOperations<UInt8>::Set(this, sizeof(StackType),  sizeof(StackType) - IsStack, bIsStack ? 1 : 0);

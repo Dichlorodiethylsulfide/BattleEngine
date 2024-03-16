@@ -1,6 +1,6 @@
 ﻿#include <iostream>
 #include "BEAtomic.h"
-#include "BEObject.h"
+#include "BEShared.h"
 #include "BEString.h"
 #include "BEConsoleIO.h"
 // Use this file for running live test cases
@@ -30,18 +30,23 @@ struct CustomType
 
 void TestSharedObjects()
 {
-    // Make this its own function to ensure the TSharedObjects are deleted at the end
-    auto Custom = MakeShared<CustomType>();
-    auto CustomPtr = Custom.Get();
+    // Make this its own function to ensure the TShared objects are deleted at the end
+    auto CustomPtr = MakeSharedPtr<CustomType>();
     BE_REQUIRES_TEST(CustomPtr->Value == 0)
-    auto Custom2 = MakeShared<CustomType>(100);
-    auto CustomPtr2 = Custom2.Get();
+    auto CustomPtr2 = MakeSharedPtr<CustomType>(100);
     BE_REQUIRES_TEST(CustomPtr2->Value == 100)
+    BE_REQUIRES_TEST(!TSharedPtr<CustomType>().IsValid())
+    BE_REQUIRES_TEST(!TSharedPtr<CustomType>(nullptr).IsValid())
+    auto CustomRef = MakeSharedRef<CustomType>();
+    BE_REQUIRES_TEST(CustomRef->Value == 0)
+    auto CustomRef2 = MakeSharedRef<CustomType>(100);
+    BE_REQUIRES_TEST(CustomRef2->Value == 100)
+    // TSharedRef<CustomType>() not allowed
+    // TSharedRef<CustomType>(nullptr) not allowed
 }
 
 int main(int argc, char* argv[])
 {
-    BE_CHECK(true)
     // New / Delete
     TestSharedObjects();
     // New / Delete

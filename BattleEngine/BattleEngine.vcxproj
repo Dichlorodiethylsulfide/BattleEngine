@@ -625,6 +625,7 @@
     <ClInclude Include="Include\BEConsoleIO.h" />
     <ClInclude Include="Include\BEMemory.h" />
     <ClInclude Include="Include\BEObject.h" />
+    <ClInclude Include="Include\BEShared.h" />
     <ClInclude Include="Include\BEString.h" />
     <ClInclude Include="Include\BETypeTraits.h" />
   </ItemGroup>
