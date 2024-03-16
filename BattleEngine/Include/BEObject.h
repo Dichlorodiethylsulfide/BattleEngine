@@ -178,7 +178,7 @@ auto* New(Args&&... args)
 {
     const auto& Allocator = GetAllocator();
     void* RawObject = Allocator.Malloc(sizeof(T));
-    BE_CHECK(!RawObject);
+    BE_CHECK(!RawObject)
     BEMemory::MemZero(RawObject, sizeof(T));
     T* Object = static_cast<T*>(RawObject);
     *Object = T(BEForward<Args&&>(args)...);

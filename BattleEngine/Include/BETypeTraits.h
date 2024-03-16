@@ -1,7 +1,17 @@
 ﻿#pragma once
 
 // All definitions in BETypeTraits.h will be moved into appropriate files / folders when ready
+
+#ifdef _WIN32
+#include <intrin.h>
+// __nop needed for Windows compiler to stop at correct debug location
+#define NOP __nop();
+#else
+#define NOP
+#endif
 // Avoid at all costs putting includes for other files in this file
+
+#define PLATFORM_BREAK { NOP __debugbreak(); }
 
 /* Naming Conventions
  * - BE for BE-specific Objects
@@ -290,7 +300,7 @@ using Type = res; \
 #define BE_CHECK(x) \
     if(BE_LIKELY(x)) \
     { \
-        __debugbreak(); \
+        PLATFORM_BREAK \
     }
 
 #define BE_CHECK_LOG(x, y) BE_CHECK(x) // add logging to this macro

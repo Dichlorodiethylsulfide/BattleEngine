@@ -41,6 +41,7 @@ void TestSharedObjects()
 
 int main(int argc, char* argv[])
 {
+    BE_CHECK(true)
     // New / Delete
     TestSharedObjects();
     // New / Delete

@@ -185,7 +185,7 @@ struct BESmallObjectOptimizedStack
             if(Length * sizeof(T) > GetActualSizeLimit())
             {
                 // Cannot set the Stack to contain more elements than is available in 64 bytes
-                __debugbreak();
+                PLATFORM_BREAK
             }
             BEMemory::BEByteOperations<UInt8>::Set(this, sizeof(StackType),  sizeof(StackType) - BESmallObjectOptimizedStack::Length, static_cast<UInt8>(Length));
         }
