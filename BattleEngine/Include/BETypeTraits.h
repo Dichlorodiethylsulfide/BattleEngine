@@ -502,8 +502,3 @@ BE_FORCEINLINE constexpr TRemoveReferenceT<T>&& BEMove(T&& Object) noexcept
 {
     return static_cast<TRemoveReferenceT<T>&&>(Object);
 }
-/*_EXPORT_STD template <class _Ty>
-_NODISCARD _MSVC_INTRINSIC constexpr remove_reference_t<_Ty>&& move(_Ty&& _Arg) noexcept {
-    return static_cast<remove_reference_t<_Ty>&&>(_Arg);
-}*/
-//
