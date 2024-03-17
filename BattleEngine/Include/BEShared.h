@@ -74,12 +74,12 @@ public:
     }
     T* operator->() const
     {
-        BE_CHECK(!IsValid())
+        BE_CHECK_NO_RET(!IsValid())
         return Object;
     }
     T& operator*() const
     {
-        BE_CHECK(!IsValid())
+        BE_CHECK_NO_RET(!IsValid())
         return Object;
     }
     bool IsValid() const
@@ -158,12 +158,12 @@ public:
     }
     T* operator->() const
     {
-        BE_CHECK(!Object)
+        BE_CHECK_NO_RET(!Object)
         return Object;
     }
     T& operator*() const
     {
-        BE_CHECK(!Object)
+        BE_CHECK_NO_RET(!Object)
         return Object;
     }
     TSharedRef& operator=(const TSharedRef& Other)

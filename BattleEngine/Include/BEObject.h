@@ -45,10 +45,10 @@ void Delete(T*& Object)
 }
 
 template<typename T, typename ... Args>
-auto* New(Args&&... args)
+T* New(Args&&... args)
 {
     T* RawObject = BETypedMemoryAllocation::TMalloc<T>();
-    BE_CHECK(!RawObject)
+    BE_CHECK_RET(!RawObject, nullptr)
     *RawObject = T(BEForward<Args&&>(args)...);
     return RawObject;
 }

@@ -115,8 +115,8 @@ void* BETypedMemoryAllocation::Malloc(SizeType Hash, SizeType Size)
         if(BDesc.ElementSize != Size)
         {
             // Two or more object hashes have collided
-           PLATFORM_BREAK("The hash existed in the allocation table "
-                          "but the size of each Element in the current block does not match the size we are allocating") 
+           PLATFORM_BREAK_RET("The hash existed in the allocation table "
+                          "but the size of each Element in the current block does not match the size we are allocating", nullptr)
         }
         SizeType Index = BDesc.FindNextAvailableIndex();
         if(Index != TGetIntLimit<SizeType>::GetMax())
@@ -127,8 +127,7 @@ void* BETypedMemoryAllocation::Malloc(SizeType Hash, SizeType Size)
             BEMemory::MemZero(FreePtr, BDesc.ElementSize);
             return FreePtr;
         }
-        PLATFORM_BREAK("'Index' was invalid")
-        return nullptr;
+        PLATFORM_BREAK_RET("'Index' was invalid", nullptr)
     }
     ObjectAllocationHashMap.insert(std::make_pair(Hash, BlockDirectory()));
     return Malloc(Hash, Size);
@@ -147,7 +146,6 @@ void BETypedMemoryAllocation::Free(SizeType Hash, void* Object)
             if(!BDir)
             {
                 PLATFORM_BREAK("We reached the end of the allocation table without finding the object")
-                return;
             }
         }
         TotalIndividualAllocations -= BDir->Descriptor.ElementSize;

@@ -12,7 +12,9 @@
 // Avoid at all costs putting includes for other files in this file
 
 #define PLATFORM_BREAK_ { NOP __debugbreak(); }
-#define PLATFORM_BREAK(x) PLATFORM_BREAK_
+#define PLATFORM_BREAK_RET(x, ret) PLATFORM_BREAK_ return ret;
+#define PLATFORM_BREAK_NO_RET(x) PLATFORM_BREAK_
+#define PLATFORM_BREAK(x) PLATFORM_BREAK_RET(x,)
 
 /* Naming Conventions
  * - BE for BE-specific Objects
@@ -309,7 +311,17 @@ using Type = res; \
         PLATFORM_BREAK("Failed check") \
     }
 
-#define BE_CHECK_LOG(x, y) BE_CHECK(x) // add logging to this macro
+#define BE_CHECK_RET(x, ret) \
+if(BE_LIKELY(x)) \
+{ \
+PLATFORM_BREAK_RET("Failed check", ret) \
+}
+
+#define BE_CHECK_NO_RET(x) \
+if(BE_LIKELY(x)) \
+{ \
+PLATFORM_BREAK_NO_RET("Failed check") \
+}
 
 #define BE_DEFAULT_CONSTRUCTION(type) \
     type() = default; \
