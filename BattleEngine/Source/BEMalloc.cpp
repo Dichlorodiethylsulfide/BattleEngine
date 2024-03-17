@@ -51,7 +51,7 @@ struct BlockDescriptor
 
     BE_FORCEINLINE void SetIndex(SizeType Index, bool bIsUnavailable)
     {
-        if(Index > ElementCount)
+        if(Index >= ElementCount)
         {
             return;
         }
@@ -60,7 +60,7 @@ struct BlockDescriptor
     
     BE_FORCEINLINE bool IsIndexUnavailable(SizeType Index) const
     {
-        if(Index > ElementCount)
+        if(Index >= ElementCount)
         {
             return false;
         }
