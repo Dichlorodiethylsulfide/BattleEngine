@@ -32,7 +32,7 @@ void BEMemory::MemMove(void* Destination, void* Source, SizeType Bytes)
 
 void BEMemory::OnOutOfMemory()
 {
-    PLATFORM_BREAK
+    PLATFORM_BREAK("Out of memory")
 }
 
 constexpr UInt64 MaxAlloc = static_cast<UInt64>(1024) * 1024 * 1024; // Worry if we're allocating over 1GB at a time
@@ -40,6 +40,6 @@ void BEMemory::CheckMaxAlloc(SizeType Bytes)
 {
     if(Bytes >= MaxAlloc)
     {
-        PLATFORM_BREAK
+        PLATFORM_BREAK("Allocation is too big")
     }
 }

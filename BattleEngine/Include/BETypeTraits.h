@@ -11,7 +11,8 @@
 #endif
 // Avoid at all costs putting includes for other files in this file
 
-#define PLATFORM_BREAK { NOP __debugbreak(); }
+#define PLATFORM_BREAK_ { NOP __debugbreak(); }
+#define PLATFORM_BREAK(x) PLATFORM_BREAK_
 
 /* Naming Conventions
  * - BE for BE-specific Objects
@@ -300,7 +301,7 @@ using Type = res; \
 #define BE_CHECK(x) \
     if(BE_LIKELY(x)) \
     { \
-        PLATFORM_BREAK \
+        PLATFORM_BREAK("Failed check") \
     }
 
 #define BE_CHECK_LOG(x, y) BE_CHECK(x) // add logging to this macro

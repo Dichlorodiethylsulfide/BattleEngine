@@ -119,7 +119,7 @@ void* BETypedMemoryAllocation::Malloc(SizeType Hash, SizeType Size)
             BEMemory::MemZero(FreePtr, BDesc.ElementSize);
             return FreePtr;
         }
-        PLATFORM_BREAK
+        PLATFORM_BREAK("'Index' was invalid")
         return nullptr;
     }
     ObjectAllocationHashMap.insert(std::make_pair(Hash, BlockDirectory()));
@@ -141,8 +141,7 @@ void BETypedMemoryAllocation::Free(SizeType Hash, void* Object)
         BDir->Descriptor.SetIndex(Index, false);
         return;
     }
-    // We cannot free an object if its type does not exist in the hash map
-    PLATFORM_BREAK
+    PLATFORM_BREAK("We cannot free an object if its type does not exist in the hash map")
 }
 
 bool BETypedMemoryAllocation::CheckAddressInternal(SizeType Hash, void* Object)
