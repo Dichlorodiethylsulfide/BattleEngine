@@ -73,6 +73,12 @@ struct BESmallObjectOptimizedStack
         ResetStackStateInternal();
     }
 
+    BESmallObjectOptimizedStack(SizeType Length)
+        : BESmallObjectOptimizedStack()
+    {
+        Reserve(Length);
+    }
+
     BESmallObjectOptimizedStack(const T* Elements, SizeType Length)
         : BESmallObjectOptimizedStack()
     {
@@ -219,6 +225,22 @@ struct BESmallObjectOptimizedStack
         }
         SetLength(Length);
         BEMemory::MemCopy(ThisElementsPointer, Elements, Bytes);
+    }
+
+    BE_FORCEINLINE void Reserve(SizeType Length)
+    {
+        Clear();
+        SetIsStack(Length < GetActualSizeLimit());
+        SizeType Bytes = sizeof(T) * Length;
+        if(!GetIsStack())
+        {
+            const auto& Allocator = GetAllocator();
+            T* ThisElementsPointer = static_cast<T*>(Allocator.Malloc(Bytes));
+            BE_CHECK(!ThisElementsPointer);
+            BEMemory::MemZero(ThisElementsPointer, Bytes);
+            InternalUnion.Other.Pointer = ThisElementsPointer;
+        }
+        SetLength(Length);
     }
 };
 

@@ -5,7 +5,10 @@
 class BEString : public BEArray<Char>
 {
 public:
+    using Base = BEArray<Char>;
+    
     BEString();
+    BEString(SizeType Length);
     BEString(const Char* CString);
     BEString(const BEString& String);
     BEString(BEString&& String) noexcept;
@@ -15,6 +18,7 @@ public:
     BEString& operator=(BEString&& String) noexcept;
 
     const Char* CStr() const;
+    Char* CBuffer();
 
     static SizeType GetLength(const Char* CString);
 };

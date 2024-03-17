@@ -6,6 +6,7 @@ class BEArray : public ICollection
 {
 public:
     BEArray() = default;
+    BEArray(SizeType Length);
     BEArray(const T* Elements, SizeType Length);
     BEArray(const BEArray& Array) { *this = Array; }
     BEArray(BEArray&& Array) noexcept { *this = BEMove<BEArray>(Array); }
@@ -22,6 +23,12 @@ public:
 protected:
     BESmallObjectOptimizedStack<T> InternalStack;
 };
+
+template <typename T>
+BEArray<T>::BEArray(SizeType Length)
+{
+    InternalStack = BESmallObjectOptimizedStack<T>(Length);
+}
 
 template <typename T>
 BEArray<T>::BEArray(const T* Elements, SizeType Length)

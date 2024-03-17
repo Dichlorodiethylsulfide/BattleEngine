@@ -23,6 +23,8 @@
 
 #define BE_RUN_TESTS_CASES 1
 
+#define BE_USE_STD_ATOMICS 1 // my intention is to implement my own but use this for now
+#define BE_USE_STD_THREADS 1 // my intention is to implement my own but use this for now
 
 // Type trait definitions
 #define BE_STRINGIFY(x) #x

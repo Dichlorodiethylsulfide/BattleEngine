@@ -5,6 +5,11 @@ BEString::BEString()
     *this = "";
 }
 
+BEString::BEString(SizeType Length)
+    : Base(Length)
+{
+}
+
 BEString::BEString(const Char* CString)
 {
     *this = CString;
@@ -41,6 +46,11 @@ BEString& BEString::operator=(BEString&& String) noexcept
 }
 
 const Char* BEString::CStr() const
+{
+    return InternalStack.GetReinterpretedPointer();
+}
+
+Char* BEString::CBuffer()
 {
     return InternalStack.GetReinterpretedPointer();
 }

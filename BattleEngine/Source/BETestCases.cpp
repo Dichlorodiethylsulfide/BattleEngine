@@ -3,6 +3,7 @@
 #include "BEShared.h"
 #include "BEString.h"
 #include "BEConsoleIO.h"
+#include "BETime.h"
 // Use this file for running live test cases
 
 static TAtomic<SizeType> Assertions = 0;
@@ -17,6 +18,12 @@ if(BE_LIKELY(x)) \
 else \
 { \
     std::cout << BE_STRINGIFY(x) << " failed" << "\n"; \
+}
+
+#define BE_CHECK_TEST(x) \
+if(BE_UNLIKELY(x)) \
+{ \
+std::cout << BE_STRINGIFY(x) << " failed the check" << "\n"; \
 }
 
 #define BE_CHECK_ALL_TESTS std::cout << BEIOColorOutputModifier(Assertions == Successes ? BE_FG_GREEN : BE_FG_RED) << Successes << " out of " << Assertions << " assertions were successful" << "\n";
@@ -52,6 +59,16 @@ struct TypeB { int B; };
 
 int main(int argc, char* argv[])
 {
+    // Time
+    const auto Now = BETime::Now();
+    BETime::WaitForMilliseconds(1000);
+    const auto TimeWaited = (BETime::Now() - Now).As<BETime::Milliseconds>();
+    // Waiting does not have perfect accuracy
+    // However, it is guaranteed to wait at least the amount of time specified
+    // On average, waiting for 1000 milliseconds yields 1020 milliseconds so 1100 is a HIGH upper bound
+    BE_REQUIRES_TEST(1000 < TimeWaited && TimeWaited < 1100)
+    BE_CHECK_TEST(1000 < TimeWaited && TimeWaited < 1030)
+    // Time
     // Allocation / Deallocation
     // Double check hashes don't match for near-identical types
     SizeType HashA = typeid(TypeA).hash_code();
