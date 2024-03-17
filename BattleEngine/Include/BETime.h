@@ -6,23 +6,27 @@ static constexpr size_t BETimeBufferSize = 33; // 32 + 1
 
 struct BETime
 {
-    using SizeType = long long;
-
     BE_FORCEINLINE static errno_t GetCTime(Char* const Buffer, SizeType const SizeInWords, time_t const* const Time);
-    
+
     /*
      * Describes an immutable amount of time
      * Time calculations should be placed in BETimeContainer
      */
-    template<SizeType TTime>
-    struct Duration
+    template<SizeType TCount, typename TTime = SizeType> struct Duration;
+    template<SizeType TCount>
+    struct Duration<TCount>
     {
-        static constexpr SizeType Rep = TTime;
+        static constexpr SizeType Rep = TCount;
         const SizeType WaitTime = 0;
         Duration(SizeType Count)
         {
             BE_MODIFY_CONST(WaitTime, Count * Rep);
         }
+    };
+    template<SizeType TCount, typename TTime>
+    struct Duration
+    {
+        static constexpr SizeType WaitTime = TTime::Rep * TCount;
     };
 
     using Nanoseconds = Duration<1>;
@@ -33,13 +37,15 @@ struct BETime
     using Hours = Duration<Minutes::Rep * 60>;
     using Days = Duration<Hours::Rep * 24>;
 
+    static constexpr SizeType LargestTime = Duration<7, Days>::WaitTime;
+
     /*
      * Describes an amount of time that can be updated, changed, etc
      */
     class BETimeContainer
     {
     public:
-        BETimeContainer(SizeType CurrentTime);
+        BETimeContainer(Int64 CurrentTime);
         
         template<SizeType TTime>
         BETimeContainer(Duration<TTime> CurrentTime)
@@ -68,13 +74,13 @@ struct BETime
             return m_currentTime - Other.m_currentTime;
         }
     private:
-        SizeType m_currentTime{};
+        Int64 m_currentTime{};
     };
     
     class BEDisplayableTime : public BETimeContainer
     {
     public:
-        BEDisplayableTime(SizeType CurrentTime);
+        BEDisplayableTime(Int64 CurrentTime);
     private:
         BEString m_currentTimeBuffer{BETimeBufferSize};
         friend SOStream&

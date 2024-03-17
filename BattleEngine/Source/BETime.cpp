@@ -10,12 +10,12 @@ errno_t BETime::GetCTime(Char* const Buffer, SizeType const SizeInWords, time_t 
 #endif
 }
 
-BETime::BETimeContainer::BETimeContainer(long long CurrentTime)
+BETime::BETimeContainer::BETimeContainer(Int64 CurrentTime)
     : m_currentTime(CurrentTime)
 {
 }
 
-BETime::BEDisplayableTime::BEDisplayableTime(long long CurrentTime)
+BETime::BEDisplayableTime::BEDisplayableTime(Int64 CurrentTime)
     : BETimeContainer(CurrentTime)
 {
     if(GetCTime(m_currentTimeBuffer.CBuffer(), BETimeBufferSize, &CurrentTime)) // > 0 is an error
@@ -37,5 +37,9 @@ BETime::BETimeContainer BETime::Now()
 
 void BETime::WaitForNanoseconds(SizeType Nanoseconds)
 {
+    if(Nanoseconds > LargestTime)
+    {
+        PLATFORM_BREAK("Number of nanoseconds is larger than 7 days")
+    }
     ThisThread::SleepFor(Nanoseconds);
 }

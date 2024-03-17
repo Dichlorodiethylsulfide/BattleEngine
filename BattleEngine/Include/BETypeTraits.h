@@ -348,7 +348,7 @@ PLATFORM_BREAK_NO_RET("Failed check") \
 #define BE_T_DEFINE_TRAIT_TYPES(x) template<typename T> using x##T = typename x##<T>::Type;
 
 // Only place this macro in the constructor
-#define BE_MODIFY_CONST(Var, Amount) *const_cast<TRemoveConstT<decltype(Var)>*>(&Var) = Amount;
+#define BE_MODIFY_CONST(Var, Amount) *const_cast<TRemoveConstT<decltype(Var)>*>(&Var) = Amount
 
 //
 // Type trait substitutions
