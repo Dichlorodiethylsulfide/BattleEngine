@@ -144,6 +144,11 @@ void BETypedMemoryAllocation::Free(SizeType Hash, void* Object)
         while((Index = BDir->Descriptor.FindObjectIndex(Object)) == TGetIntLimit<SizeType>::GetMax())
         {
             BDir = BDir->Next;
+            if(!BDir)
+            {
+                PLATFORM_BREAK("We reached the end of the allocation table without finding the object")
+                return;
+            }
         }
         TotalIndividualAllocations -= BDir->Descriptor.ElementSize;
         BDir->Descriptor.SetIndex(Index, false);

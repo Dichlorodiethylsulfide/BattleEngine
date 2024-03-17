@@ -37,10 +37,11 @@ class BEObject
 };
 
 template<typename T>
-void Delete(T* Object)
+void Delete(T*& Object)
 {
     BE_CHECK(!Object)
     BETypedMemoryAllocation::TFree<T>(Object);
+    Object = nullptr;
 }
 
 template<typename T, typename ... Args>

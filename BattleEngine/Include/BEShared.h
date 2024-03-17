@@ -69,7 +69,6 @@ public:
         {
             Delete(Object);
             delete Counter;
-            Object = nullptr;
             Counter = nullptr;
         }
     }
@@ -154,7 +153,6 @@ public:
         {
             Delete(Object);
             delete Counter;
-            Object = nullptr;
             Counter = nullptr;
         }
     }
