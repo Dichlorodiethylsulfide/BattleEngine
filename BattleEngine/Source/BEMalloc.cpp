@@ -111,6 +111,12 @@ void* BETypedMemoryAllocation::Malloc(SizeType Hash, SizeType Size)
             BDesc.ElementSize = Size;
             BDesc.TotalSize = TotalSize;
         }
+        if(BDesc.ElementSize != Size)
+        {
+            // Two or more object hashes have collided
+           PLATFORM_BREAK("The hash existed in the allocation table "
+                          "but the size of each Element in the current block does not match the size we are allocating") 
+        }
         SizeType Index = BDesc.FindNextAvailableIndex();
         if(Index != TGetIntLimit<SizeType>::GetMax())
         {

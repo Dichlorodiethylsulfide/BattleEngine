@@ -47,9 +47,16 @@ void TestSharedObjects()
 
 #include "BEMalloc.h"
 
+struct TypeA { int A; };
+struct TypeB { int B; };
+
 int main(int argc, char* argv[])
 {
     // Allocation / Deallocation
+    // Double check hashes don't match for near-identical types
+    SizeType HashA = typeid(TypeA).hash_code();
+    SizeType HashB = typeid(TypeB).hash_code();
+    BE_REQUIRES_TEST(HashA != HashB)
     constexpr int Size = 1024;
     int* Datas[Size];
     for (int i = 0; i < Size; i++)
