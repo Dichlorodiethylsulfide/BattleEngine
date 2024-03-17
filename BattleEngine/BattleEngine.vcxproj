@@ -384,6 +384,7 @@
       <AdditionalIncludeDirectories>C:\git\BattleEngine\BattleEngine/Include;C:\git\BattleEngine\BattleEngine/Source</AdditionalIncludeDirectories>
       <LibCompiled>true</LibCompiled>
     </ClCompile>
+    <ClCompile Include="Source\BEMalloc.cpp" />
     <ClCompile Include="Source\BEMemory.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -623,6 +624,7 @@
     <ClInclude Include="Include\BEAsserts.h" />
     <ClInclude Include="Include\BEAtomic.h" />
     <ClInclude Include="Include\BEConsoleIO.h" />
+    <ClInclude Include="Include\BEMalloc.h" />
     <ClInclude Include="Include\BEMemory.h" />
     <ClInclude Include="Include\BEObject.h" />
     <ClInclude Include="Include\BEShared.h" />

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "BEAllocatorPolicy.h"
+#include "BEMalloc.h"
 
 // Further implement BEObject and BEObjectPtr
 
@@ -40,18 +40,14 @@ template<typename T>
 void Delete(T* Object)
 {
     BE_CHECK(!Object)
-    const auto& Allocator = GetAllocator();
-    Allocator.Free(Object);
+    BETypedMemoryAllocation::TFree<T>(Object);
 }
 
 template<typename T, typename ... Args>
 auto* New(Args&&... args)
 {
-    const auto& Allocator = GetAllocator();
-    void* RawObject = Allocator.Malloc(sizeof(T));
+    T* RawObject = BETypedMemoryAllocation::TMalloc<T>();
     BE_CHECK(!RawObject)
-    BEMemory::MemZero(RawObject, sizeof(T));
-    T* Object = static_cast<T*>(RawObject);
-    *Object = T(BEForward<Args&&>(args)...);
-    return Object;
+    *RawObject = T(BEForward<Args&&>(args)...);
+    return RawObject;
 }

@@ -45,8 +45,26 @@ void TestSharedObjects()
     // TSharedRef<CustomType>(nullptr) not allowed
 }
 
+#include "BEMalloc.h"
+
 int main(int argc, char* argv[])
 {
+    // Allocation / Deallocation
+    constexpr int Size = 1024;
+    int* Datas[Size];
+    for (int i = 0; i < Size; i++)
+    {
+        Datas[i] = BETypedMemoryAllocation::TMalloc<int>();
+        *Datas[i] = i;
+    }
+    for (int i = 0; i < Size; i++)
+    {
+        BE_REQUIRES_TEST(*Datas[i] == i)
+        BETypedMemoryAllocation::TFree(Datas[i]);
+    }
+    // We freed all the memory we allocated so we should not have any current allocations (of any size)
+    BE_REQUIRES_TEST(BETypedMemoryAllocation::GetCurrentAllocations() == 0)
+    // Allocation / Deallocation
     // New / Delete
     TestSharedObjects();
     // New / Delete
