@@ -2,7 +2,7 @@
 
 BEString::BEString()
 {
-    *this = "";
+    *this = TEXT("");
 }
 
 BEString::BEString(SizeType Length)
@@ -41,7 +41,7 @@ BEString& BEString::operator=(const BEString& String)
 BEString& BEString::operator=(BEString&& String) noexcept
 {
     InternalStack = BEMove(String.InternalStack);
-    String = "";
+    String = TEXT("");
     return *this;
 }
 
@@ -58,7 +58,7 @@ Char* BEString::CBuffer()
 SizeType BEString::GetLength(const Char* CString)
 {
     SizeType Length = 0;
-    while(CString[Length] != '\0' && Length != TGetIntLimit<SizeType>::GetMax())
+    while(CString[Length] != TEXT('\0') && Length != TGetIntLimit<SizeType>::GetMax())
     {
         Length++;
     }

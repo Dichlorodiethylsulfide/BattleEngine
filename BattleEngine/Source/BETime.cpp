@@ -1,6 +1,15 @@
 ﻿#include "BETime.h"
 #include "BEThread.h"
 
+errno_t BETime::GetCTime(Char* const Buffer, SizeType const SizeInWords, time_t const* const Time)
+{
+#if UNICODE
+    return _wctime_s(Buffer, SizeInWords, Time);
+#else
+    return ctime_s(Buffer, SizeInWords, Time);
+#endif
+}
+
 BETime::BETimeContainer::BETimeContainer(long long CurrentTime)
     : m_currentTime(CurrentTime)
 {
@@ -9,9 +18,9 @@ BETime::BETimeContainer::BETimeContainer(long long CurrentTime)
 BETime::BEDisplayableTime::BEDisplayableTime(long long CurrentTime)
     : BETimeContainer(CurrentTime)
 {
-    if(ctime_s(m_currentTimeBuffer.CBuffer(), BETimeBufferSize, &CurrentTime)) // > 0 is an error
+    if(GetCTime(m_currentTimeBuffer.CBuffer(), BETimeBufferSize, &CurrentTime)) // > 0 is an error
     {
-        m_currentTimeBuffer = "Error converting ctime to BETime"; // 32 characters -- do not modify
+        m_currentTimeBuffer = TEXT("Error converting ctime to BETime"); // 32 characters -- do not modify
     }
 }
 
@@ -26,7 +35,7 @@ BETime::BETimeContainer BETime::Now()
     return duration_cast<nanoseconds>(high_resolution_clock::now().time_since_epoch()).count();
 }
 
-void BETime::WaitForMilliseconds(long long Milliseconds)
+void BETime::WaitForNanoseconds(SizeType Nanoseconds)
 {
-    ThisThread::SleepFor(Milliseconds);
+    ThisThread::SleepFor(Nanoseconds);
 }

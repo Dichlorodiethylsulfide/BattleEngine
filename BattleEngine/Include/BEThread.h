@@ -10,5 +10,5 @@ using SThread = std::thread;
 
 namespace ThisThread
 {
-    void SleepFor(SizeType Milliseconds);
+    void SleepFor(SizeType Nanoseconds);
 }

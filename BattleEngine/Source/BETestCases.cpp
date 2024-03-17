@@ -17,13 +17,13 @@ if(BE_LIKELY(x)) \
 } \
 else \
 { \
-    std::cout << BE_STRINGIFY(x) << " failed" << "\n"; \
+    COut << BE_STRINGIFY(x) << TEXT(" failed") << TEXT("\n"); \
 }
 
 #define BE_CHECK_TEST(x) \
 if(BE_UNLIKELY(x)) \
 { \
-std::cout << BE_STRINGIFY(x) << " failed the check" << "\n"; \
+COut << BE_STRINGIFY(x) << TEXT(" failed the check") << TEXT("\n"); \
 }
 
 #define BE_CHECK_ALL_TESTS std::cout << BEIOColorOutputModifier(Assertions == Successes ? BE_FG_GREEN : BE_FG_RED) << Successes << " out of " << Assertions << " assertions were successful" << "\n";
@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
 {
     // Time
     const auto Now = BETime::Now();
-    BETime::WaitForMilliseconds(1000);
+    BETime::WaitFor(BETime::Milliseconds(1000));
     const auto TimeWaited = (BETime::Now() - Now).As<BETime::Milliseconds>();
     // Waiting does not have perfect accuracy
     // However, it is guaranteed to wait at least the amount of time specified
@@ -92,11 +92,11 @@ int main(int argc, char* argv[])
     BE_REQUIRES_TEST(BETypedMemoryAllocation::GetCurrentAllocations() == 0) // they should all get freed upon exiting the function
     // Allocation / Deallocation
     // BEString
-    BEString String("Hello World Hello World Hello");
+    BEString String(TEXT("Hello World Hello World Hello"));
     BE_REQUIRES_TEST(String.IsSSO())
     BE_REQUIRES_TEST(BEString::GetLength(String.CStr()) == 29)
     BE_REQUIRES_TEST(String.Length() == 30)
-    BEString LongString("THIS IS A LONG STRING VERY LONG VERY NICE BUT ALSO VERY LONG HAVE I TOLD YOU HOW LONG IT IS");
+    BEString LongString(TEXT("THIS IS A LONG STRING VERY LONG VERY NICE BUT ALSO VERY LONG HAVE I TOLD YOU HOW LONG IT IS"));
     BE_REQUIRES_TEST(!LongString.IsSSO())
     BE_REQUIRES_TEST(BEString::GetLength(LongString.CStr()) == 91)
     BE_REQUIRES_TEST(LongString.Length() == 92)

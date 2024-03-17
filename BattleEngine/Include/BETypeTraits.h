@@ -27,9 +27,14 @@
 
 #define BE_USE_STD_ATOMICS 1 // my intention is to implement my own but use this for now
 #define BE_USE_STD_THREADS 1 // my intention is to implement my own but use this for now
+#define BE_USE_STD_STREAM 1
+
+#if !defined(UNICODE)
+#define UNICODE 1
+#endif
 
 // Type trait definitions
-#define BE_STRINGIFY(x) #x
+#define BE_STRINGIFY(x) TEXT(#x)
 #define BE_CONCAT_IMPL(x, y) x##y
 #define BE_CONCAT(x, y) BE_CONCAT_IMPL(x, y)
 #define BE_FORCEINLINE __forceinline
@@ -54,12 +59,12 @@ struct UInt128
     UInt64 Low;
 };
 
-#if 1
-#define TEXT(x) x
-using Char = Ansi;
-#else // Unicode
+#if UNICODE
 #define TEXT(x) L ## x
 using Char = Unicode;
+#else
+#define TEXT(x) x
+using Char = Ansi;
 #endif
 
 template<class>
@@ -272,7 +277,7 @@ concept bRequiresTrue = Value;
 
 #define BE_T_EXPOSE_NAME(type) \
     template<> \
-    struct TNameOf<type> { BE_FORCEINLINE static Char const* GetName() { return TEXT(BE_STRINGIFY(type)); } };
+    struct TNameOf<type> { BE_FORCEINLINE static Char const* GetName() { return BE_STRINGIFY(type); } };
 
 #define BE_T_VALID_TRAIT(trait, type) template <> struct trait<type> { enum { Value = true }; };
 #define BE_T_VALID_CV_TRAIT(trait, cv) template <typename T> struct trait<cv T> { enum { Value = trait<T>::Value }; };
@@ -296,7 +301,7 @@ using Type = res; \
         BE_FORCEINLINE static type GetMax() { return max; }\
     };
 
-#define BE_T_ASSERT(assertion_msg, ...) static_assert(__VA_ARGS__, assertion_msg);
+#define BE_T_ASSERT(assertion_msg, ...) static_assert(__VA_ARGS__, TEXT(assertion_msg));
 #define BE_T_ASSERT_TRAIT(...) BE_T_ASSERT("Failed to substitute type in " BE_STRINGIFY((__VA_ARGS__)), __VA_ARGS__::Value);
 
 #define BE_T_ASSERT_HEAP_PTR(type) BE_T_ASSERT("Heap Pointer must be 16 bytes", sizeof(THeapPointer<type>) == 16);
@@ -341,6 +346,9 @@ PLATFORM_BREAK_NO_RET("Failed check") \
     type operator=(type&&) = delete;
 
 #define BE_T_DEFINE_TRAIT_TYPES(x) template<typename T> using x##T = typename x##<T>::Type;
+
+// Only place this macro in the constructor
+#define BE_MODIFY_CONST(Var, Amount) *const_cast<TRemoveConstT<decltype(Var)>*>(&Var) = Amount;
 
 //
 // Type trait substitutions

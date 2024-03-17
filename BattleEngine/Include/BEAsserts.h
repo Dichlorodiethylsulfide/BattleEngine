@@ -37,12 +37,12 @@ BE_T_ASSERT_TRAIT(TIsPointer<Int8**>)
 BE_T_ASSERT_TRAIT(TIsConst<const Int8>)
 BE_T_ASSERT_TRAIT(!TIsConst<Int8>)
 BE_T_ASSERT_TRAIT(!TIsConst<volatile Int8>)
-BE_T_ASSERT_TRAIT(TIsConst<const volatile int8>)
+BE_T_ASSERT_TRAIT(TIsConst<const volatile Int8>)
 
 BE_T_ASSERT_TRAIT(TIsVolatile<volatile Int8>)
 BE_T_ASSERT_TRAIT(!TIsVolatile<Int8>)
 BE_T_ASSERT_TRAIT(!TIsVolatile<const Int8>)
-BE_T_ASSERT_TRAIT(TIsVolatile<const volatile int8>)
+BE_T_ASSERT_TRAIT(TIsVolatile<const volatile Int8>)
 
 // Macro to stop naming conflicts in case this is included anywhere else
 #define BE_TYPE_TRAIT_DERIVED_TEST(x) BE_Special_Derived_Name_Var_##x
