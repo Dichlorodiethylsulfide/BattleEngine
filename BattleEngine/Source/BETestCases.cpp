@@ -71,10 +71,9 @@ int main(int argc, char* argv[])
     }
     // We freed all the memory we allocated so we should not have any current allocations (of any size)
     BE_REQUIRES_TEST(BETypedMemoryAllocation::GetCurrentAllocations() == 0)
+    TestSharedObjects(); // Creating shared objects adds to the BETypedMemoryAllocation table
+    BE_REQUIRES_TEST(BETypedMemoryAllocation::GetCurrentAllocations() == 0) // they should all get freed upon exiting the function
     // Allocation / Deallocation
-    // New / Delete
-    TestSharedObjects();
-    // New / Delete
     // BEString
     BEString String("Hello World Hello World Hello");
     BE_REQUIRES_TEST(String.IsSSO())

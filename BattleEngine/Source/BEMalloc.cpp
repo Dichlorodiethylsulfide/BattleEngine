@@ -85,6 +85,7 @@ struct BlockDirectory
 };
 
 static TAtomic<SizeType> TotalAllocations = 0;
+static TAtomic<SizeType> TotalIndividualAllocations = 0;
 static std::map<SizeType, BlockDirectory> ObjectAllocationHashMap = {};
 
 void* BETypedMemoryAllocation::Malloc(SizeType Hash, SizeType Size)
@@ -120,6 +121,7 @@ void* BETypedMemoryAllocation::Malloc(SizeType Hash, SizeType Size)
         SizeType Index = BDesc.FindNextAvailableIndex();
         if(Index != TGetIntLimit<SizeType>::GetMax())
         {
+            TotalIndividualAllocations += Size;
             BDesc.SetIndex(Index, true);
             UInt8* FreePtr = static_cast<UInt8*>(BDesc.Block) + (Index * BDesc.ElementSize);
             BEMemory::MemZero(FreePtr, BDesc.ElementSize);
@@ -143,7 +145,7 @@ void BETypedMemoryAllocation::Free(SizeType Hash, void* Object)
         {
             BDir = BDir->Next;
         }
-        TotalAllocations -= BDir->Descriptor.ElementSize;
+        TotalIndividualAllocations -= BDir->Descriptor.ElementSize;
         BDir->Descriptor.SetIndex(Index, false);
         return;
     }
@@ -186,6 +188,11 @@ bool BETypedMemoryAllocation::CheckAddressSlow(void* Object)
 }
 
 SizeType BETypedMemoryAllocation::GetCurrentAllocations()
+{
+    return TotalIndividualAllocations;
+}
+
+SizeType BETypedMemoryAllocation::GetCurrentTotalAllocations()
 {
     return TotalAllocations;
 }

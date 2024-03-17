@@ -116,6 +116,9 @@ template<class>
 struct TIsRReference { enum { Value = false }; };
 
 template<typename T>
+struct TIsReference { enum { Value = TIsLReference<T>::Value || TIsRReference<T>::Value }; };
+
+template<typename T>
 struct TRemoveConst
 {
     using Type = T;
