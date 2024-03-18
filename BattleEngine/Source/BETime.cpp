@@ -11,7 +11,7 @@ errno_t BETime::GetCTime(Char* const Buffer, SizeType const SizeInWords, time_t 
 }
 
 BETime::BETimeContainer::BETimeContainer(Int64 CurrentTime)
-    : m_currentTime(CurrentTime)
+    : m_CurrentTime(CurrentTime)
 {
 }
 
@@ -39,7 +39,8 @@ void BETime::WaitForNanoseconds(SizeType Nanoseconds)
 {
     if(Nanoseconds > LargestTime)
     {
-        PLATFORM_BREAK("Number of nanoseconds is larger than 7 days")
+        Nanoseconds = LargestTime;
+        // Add a warning to the log
     }
     ThisThread::SleepFor(Nanoseconds);
 }

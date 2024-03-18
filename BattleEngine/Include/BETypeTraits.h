@@ -53,6 +53,10 @@ using SizeType = UInt64;
 using UIntPtr = UInt64;
 using Null = decltype(nullptr);
 
+// C++26 proposal to remove volatility (or at least the 'type' describing volatility)
+// Adding macro in case we need to turn this off
+#define VOLATILE volatile
+
 struct UInt128
 {
     UInt64 High;
@@ -94,6 +98,9 @@ struct TIsFunction { enum { Value = false }; };
 
 template<class>
 struct TIsPointer { enum { Value = false }; };
+
+template<class>
+struct TIsBool { enum { Value = false }; };
 
 template<class>
 struct TNameOf { BE_FORCEINLINE static Char const* GetName() { return TEXT("Unknown"); } };
@@ -160,7 +167,7 @@ struct TAddConst
 template<typename T>
 struct TAddVolatile
 {
-    using Type = volatile T;
+    using Type = VOLATILE T;
 };
 
 template<typename T>
@@ -237,6 +244,9 @@ struct TUnion<T, TTypes...>
     using OtherType = decltype(Other);
 };
 
+// __is_enum
+// __underlying_type
+
 // All interfaces should be considered IInterfaces
 class IInterface
 {
@@ -283,8 +293,8 @@ concept bRequiresTrue = Value;
 #define BE_T_VALID_CV_TRAIT(trait, cv) template <typename T> struct trait<cv T> { enum { Value = trait<T>::Value }; };
 #define BE_T_VALID_ALL_CV_TRAIT(trait) \
       BE_T_VALID_CV_TRAIT(trait, const) \
-      BE_T_VALID_CV_TRAIT(trait, volatile) \
-      BE_T_VALID_CV_TRAIT(trait, const volatile)
+      BE_T_VALID_CV_TRAIT(trait, VOLATILE) \
+      BE_T_VALID_CV_TRAIT(trait, const VOLATILE)
 
 
 #define BE_T_CHANGE_TRAIT(trait, sub, res) \
@@ -346,6 +356,7 @@ PLATFORM_BREAK_NO_RET("Failed check") \
     type operator=(type&&) = delete;
 
 #define BE_T_DEFINE_TRAIT_TYPES(x) template<typename T> using x##T = typename x##<T>::Type;
+#define BE_T_DEFINE_TRAIT_VALUES(x) template<typename T> constexpr bool x##V = x##<T>::Value;
 
 // Only place this macro in the constructor
 #define BE_MODIFY_CONST(Var, Amount) *const_cast<TRemoveConstT<decltype(Var)>*>(&Var) = Amount
@@ -375,6 +386,9 @@ BE_T_VALID_TRAIT(TIsArithmetic, double)
 BE_T_VALID_TRAIT(TIsArithmetic, long double)
 BE_T_VALID_ALL_CV_TRAIT(TIsArithmetic)
 
+BE_T_VALID_TRAIT(TIsBool, bool)
+BE_T_VALID_ALL_CV_TRAIT(TIsBool)
+
 BE_T_VALID_TRAIT(TIsFloatingPoint, float)
 BE_T_VALID_TRAIT(TIsFloatingPoint, double)
 BE_T_VALID_TRAIT(TIsFloatingPoint, long double)
@@ -394,13 +408,13 @@ template<typename T>
 struct TIsConst<const T> { enum { Value = true } ; };
 
 template<typename T>
-struct TIsConst<const volatile T> { enum { Value = true } ; };
+struct TIsConst<const VOLATILE T> { enum { Value = true } ; };
 
 template<typename T>
-struct TIsVolatile<volatile T> { enum { Value = true } ; };
+struct TIsVolatile<VOLATILE T> { enum { Value = true } ; };
 
 template<typename T>
-struct TIsVolatile<const volatile T> { enum { Value = true } ; };
+struct TIsVolatile<const VOLATILE T> { enum { Value = true } ; };
 
 template<typename T>
 struct TIsLReference<T&> { enum { Value = true } ; };
@@ -429,39 +443,39 @@ BE_T_EXPOSE_NAME(Unicode)
 // Change traits depending
 //
 BE_T_CHANGE_TRAIT(TRemoveConst, const T, T)
-BE_T_CHANGE_TRAIT(TRemoveConst, volatile T, volatile T)
-BE_T_CHANGE_TRAIT(TRemoveConst, const volatile T, const volatile T)
+BE_T_CHANGE_TRAIT(TRemoveConst, VOLATILE T, VOLATILE T)
+BE_T_CHANGE_TRAIT(TRemoveConst, const VOLATILE T, const VOLATILE T)
 
 BE_T_CHANGE_TRAIT(TRemoveVolatile, const T, const T)
-BE_T_CHANGE_TRAIT(TRemoveVolatile, volatile T, T)
-BE_T_CHANGE_TRAIT(TRemoveVolatile, const volatile T, const T)
+BE_T_CHANGE_TRAIT(TRemoveVolatile, VOLATILE T, T)
+BE_T_CHANGE_TRAIT(TRemoveVolatile, const VOLATILE T, const T)
 
 BE_T_CHANGE_TRAIT(TRemovePointer, T*, T)
 BE_T_CHANGE_TRAIT(TRemovePointer, const T*, const T)
-BE_T_CHANGE_TRAIT(TRemovePointer, const volatile T*, const volatile T)
+BE_T_CHANGE_TRAIT(TRemovePointer, const VOLATILE T*, const VOLATILE T)
 
 BE_T_CHANGE_TRAIT(TRemoveReference, T&&, T)
 BE_T_CHANGE_TRAIT(TRemoveReference, T&, T)
 
 BE_T_CHANGE_TRAIT(TAddConst, const T, const T)
-BE_T_CHANGE_TRAIT(TAddConst, volatile T, const volatile T)
-BE_T_CHANGE_TRAIT(TAddConst, const volatile T, const volatile T)
+BE_T_CHANGE_TRAIT(TAddConst, VOLATILE T, const VOLATILE T)
+BE_T_CHANGE_TRAIT(TAddConst, const VOLATILE T, const VOLATILE T)
 
-BE_T_CHANGE_TRAIT(TAddVolatile, const T, const volatile T)
-BE_T_CHANGE_TRAIT(TAddVolatile, volatile T, volatile T)
-BE_T_CHANGE_TRAIT(TAddVolatile, const volatile T, const volatile T)
+BE_T_CHANGE_TRAIT(TAddVolatile, const T, const VOLATILE T)
+BE_T_CHANGE_TRAIT(TAddVolatile, VOLATILE T, VOLATILE T)
+BE_T_CHANGE_TRAIT(TAddVolatile, const VOLATILE T, const VOLATILE T)
 
 BE_T_CHANGE_TRAIT(TAddPointer, T*, T*)
 BE_T_CHANGE_TRAIT(TAddPointer, const T, const T*)
-BE_T_CHANGE_TRAIT(TAddPointer, const volatile T, const volatile T*)
+BE_T_CHANGE_TRAIT(TAddPointer, const VOLATILE T, const VOLATILE T*)
 
 BE_T_CHANGE_TRAIT(TAddLReference, const T, const T&)
-BE_T_CHANGE_TRAIT(TAddLReference, volatile T, volatile T&)
-BE_T_CHANGE_TRAIT(TAddLReference, const volatile T, const volatile T&)
+BE_T_CHANGE_TRAIT(TAddLReference, VOLATILE T, VOLATILE T&)
+BE_T_CHANGE_TRAIT(TAddLReference, const VOLATILE T, const VOLATILE T&)
 
 BE_T_CHANGE_TRAIT(TAddRReference, const T, const T&&)
-BE_T_CHANGE_TRAIT(TAddRReference, volatile T, volatile T&&)
-BE_T_CHANGE_TRAIT(TAddRReference, const volatile T, const volatile T&&)
+BE_T_CHANGE_TRAIT(TAddRReference, VOLATILE T, VOLATILE T&&)
+BE_T_CHANGE_TRAIT(TAddRReference, const VOLATILE T, const VOLATILE T&&)
 
 T_INT_LIMIT_TYPE(UInt8, 0, 0xffui8)
 T_INT_LIMIT_TYPE(Int8, (-127i8 - 1), 127i8)
@@ -481,6 +495,13 @@ BE_T_DEFINE_TRAIT_TYPES(TAddVolatile)
 BE_T_DEFINE_TRAIT_TYPES(TAddPointer)
 BE_T_DEFINE_TRAIT_TYPES(TAddLReference)
 BE_T_DEFINE_TRAIT_TYPES(TAddRReference)
+
+BE_T_DEFINE_TRAIT_VALUES(TIsArithmetic)
+BE_T_DEFINE_TRAIT_VALUES(TIsPointer)
+BE_T_DEFINE_TRAIT_VALUES(TIsBool)
+
+template<typename TA, typename TB>
+constexpr bool TIsSameV = TIsSame<TA, TB>::Value;
 //
 // Function definitions
 //

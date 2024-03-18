@@ -21,55 +21,55 @@ public:
     SizeType Length() const override;
     
 protected:
-    BESmallObjectOptimizedStack<T> InternalStack;
+    BESmallObjectOptimizedStack<T> m_InternalStack;
 };
 
 template <typename T>
 BEArray<T>::BEArray(SizeType Length)
 {
-    InternalStack = BESmallObjectOptimizedStack<T>(Length);
+    m_InternalStack = BESmallObjectOptimizedStack<T>(Length);
 }
 
 template <typename T>
 BEArray<T>::BEArray(const T* Elements, SizeType Length)
 {
-    InternalStack = BESmallObjectOptimizedStack<T>(Elements, Length);
+    m_InternalStack = BESmallObjectOptimizedStack<T>(Elements, Length);
 }
 
 template <typename T>
 BEArray<T>& BEArray<T>::operator=(const BEArray& Array)
 {
-    InternalStack = Array.InternalStack;
+    m_InternalStack = Array.m_InternalStack;
     return *this;
 }
 
 template <typename T>
 BEArray<T>& BEArray<T>::operator=(BEArray&& Array) noexcept
 {
-    InternalStack = BEMove<BESmallObjectOptimizedStack<T>>(Array.InternalStack);
+    m_InternalStack = BEMove<BESmallObjectOptimizedStack<T>>(Array.m_InternalStack);
     return *this;
 }
 
 template <typename T>
 void BEArray<T>::Clear()
 {
-    InternalStack.Clear();
+    m_InternalStack.Clear();
 }
 
 template <typename T>
 bool BEArray<T>::IsSSO() const
 {
-    return InternalStack.GetIsStack();
+    return m_InternalStack.GetIsStack();
 }
 
 template <typename T>
 bool BEArray<T>::IsEmpty() const
 {
-    return InternalStack.IsEmpty();
+    return m_InternalStack.IsEmpty();
 }
 
 template <typename T>
 UInt64 BEArray<T>::Length() const
 {
-    return InternalStack.GetLength();
+    return m_InternalStack.GetLength();
 }

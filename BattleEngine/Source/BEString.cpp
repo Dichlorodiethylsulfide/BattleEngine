@@ -28,31 +28,31 @@ BEString::BEString(BEString&& String) noexcept
 BEString& BEString::operator=(const Char* CString)
 {
     const SizeType Length = GetLength(CString) + 1;
-    InternalStack = BESmallObjectOptimizedStack(CString, Length);
+    m_InternalStack = BESmallObjectOptimizedStack(CString, Length);
     return *this;
 }
 
 BEString& BEString::operator=(const BEString& String)
 {
-    InternalStack = BESmallObjectOptimizedStack(String.CStr(), String.InternalStack.GetLength());
+    m_InternalStack = BESmallObjectOptimizedStack(String.CStr(), String.m_InternalStack.GetLength());
     return *this;
 }
 
 BEString& BEString::operator=(BEString&& String) noexcept
 {
-    InternalStack = BEMove(String.InternalStack);
+    m_InternalStack = BEMove(String.m_InternalStack);
     String = TEXT("");
     return *this;
 }
 
 const Char* BEString::CStr() const
 {
-    return InternalStack.GetReinterpretedPointer();
+    return m_InternalStack.GetReinterpretedPointer();
 }
 
 Char* BEString::CBuffer()
 {
-    return InternalStack.GetReinterpretedPointer();
+    return m_InternalStack.GetReinterpretedPointer();
 }
 
 SizeType BEString::GetLength(const Char* CString)

@@ -36,13 +36,13 @@ BE_T_ASSERT_TRAIT(TIsPointer<Int8**>)
 
 BE_T_ASSERT_TRAIT(TIsConst<const Int8>)
 BE_T_ASSERT_TRAIT(!TIsConst<Int8>)
-BE_T_ASSERT_TRAIT(!TIsConst<volatile Int8>)
-BE_T_ASSERT_TRAIT(TIsConst<const volatile Int8>)
+BE_T_ASSERT_TRAIT(!TIsConst<VOLATILE Int8>)
+BE_T_ASSERT_TRAIT(TIsConst<const VOLATILE Int8>)
 
-BE_T_ASSERT_TRAIT(TIsVolatile<volatile Int8>)
+BE_T_ASSERT_TRAIT(TIsVolatile<VOLATILE Int8>)
 BE_T_ASSERT_TRAIT(!TIsVolatile<Int8>)
 BE_T_ASSERT_TRAIT(!TIsVolatile<const Int8>)
-BE_T_ASSERT_TRAIT(TIsVolatile<const volatile Int8>)
+BE_T_ASSERT_TRAIT(TIsVolatile<const VOLATILE Int8>)
 
 // Macro to stop naming conflicts in case this is included anywhere else
 #define BE_TYPE_TRAIT_DERIVED_TEST(x) BE_Special_Derived_Name_Var_##x
@@ -59,7 +59,7 @@ BE_T_ASSERT_TRAIT(!TIsDerivedFrom<BE_TYPE_TRAIT_DERIVED_TEST(A), BE_TYPE_TRAIT_D
 
 BE_T_ASSERT_TRAIT(!TIsPointer<TRemovePointer<int*>::Type>)
 BE_T_ASSERT_TRAIT(!TIsConst<TRemoveConst<const int>::Type>)
-BE_T_ASSERT_TRAIT(!TIsVolatile<TRemoveVolatile<volatile int>::Type>)
+BE_T_ASSERT_TRAIT(!TIsVolatile<TRemoveVolatile<VOLATILE int>::Type>)
 
 BE_T_ASSERT_TRAIT(TIsSame<TRemovePointer<int*>, TRemovePointer<int*>>)
 

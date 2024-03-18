@@ -59,6 +59,9 @@ struct TypeB { int B; };
 
 int main(int argc, char* argv[])
 {
+    // Atomic
+    
+    // Atomic
     // Time
     const auto Now = BETime::Now();
     BETime::WaitFor(BETime::Milliseconds(1000));

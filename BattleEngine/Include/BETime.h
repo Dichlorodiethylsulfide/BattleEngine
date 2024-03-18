@@ -49,7 +49,7 @@ struct BETime
         
         template<SizeType TTime>
         BETimeContainer(Duration<TTime> CurrentTime)
-            : m_currentTime(CurrentTime.WaitTime)
+            : m_CurrentTime(CurrentTime.WaitTime)
         {
         }
         
@@ -58,23 +58,23 @@ struct BETime
         
         SizeType GetTime() const
         {
-            return m_currentTime;
+            return m_CurrentTime;
         }
         template<typename TimeRep>
         SizeType As() const
         {
-            return m_currentTime / TimeRep::Rep;
+            return m_CurrentTime / TimeRep::Rep;
         }
         BETimeContainer operator-(const BETimeContainer& Other) const
         {
-            return m_currentTime - Other.m_currentTime;
+            return m_CurrentTime - Other.m_CurrentTime;
         }
         BETimeContainer operator+(const BETimeContainer& Other) const
         {
-            return m_currentTime - Other.m_currentTime;
+            return m_CurrentTime - Other.m_CurrentTime;
         }
     private:
-        Int64 m_currentTime{};
+        Int64 m_CurrentTime{};
     };
     
     class BEDisplayableTime : public BETimeContainer

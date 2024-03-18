@@ -22,7 +22,7 @@ enum BEIOColourCode
 };
 
 class BEIOColorOutputModifier {
-    BEIOColourCode code;
+    BEIOColourCode m_Code;
 public:
     BEIOColorOutputModifier(BEIOColourCode pCode) : code(pCode) {}
     
