@@ -3,6 +3,7 @@
 #include "BEShared.h"
 #include "BEString.h"
 #include "BEConsoleIO.h"
+#include "BEThread.h"
 #include "BETime.h"
 // Use this file for running live test cases
 
@@ -17,8 +18,12 @@ if(BE_LIKELY(x)) \
 } \
 else \
 { \
-    COut << BE_STRINGIFY(x) << TEXT(" failed") << TEXT("\n"); \
+    COut << BE_STRINGIFY(x) << TEXT(" failed on line ") << __LINE__ << TEXT("\n"); \
 }
+
+#define BE_REQUIRES_TEST_REPORT_FAILED_VALUE(test, expected) \
+    BE_REQUIRES_TEST(test) \
+    if(Assertions != Successes) { COut << TEXT("A value of ") << (expected) << TEXT(" was passed instead") << TEXT("\n"); }
 
 #define BE_CHECK_TEST(x) \
 if(BE_UNLIKELY(x)) \
@@ -60,7 +65,20 @@ struct TypeB { int B; };
 int main(int argc, char* argv[])
 {
     // Atomic
-    
+    SAtomicBool ABoolean;
+    BE_REQUIRES_TEST(!ABoolean)
+    ABoolean.Store(true);
+    BE_REQUIRES_TEST(ABoolean)
+    ABoolean.Invert();
+    BE_REQUIRES_TEST(!ABoolean)
+    ABoolean.EnterCriticalSection(); // once we enter the critical section on this thread, the next thread should not be able to modify the ABoolean value
+    SThread Thread = SThread([&ABoolean]()
+    {
+        ABoolean.Invert(); // try to change the value
+    });
+    Thread.join();
+    ABoolean.ExitCriticalSection();
+    BE_REQUIRES_TEST(!ABoolean)
     // Atomic
     // Time
     const auto Now = BETime::Now();
@@ -69,7 +87,7 @@ int main(int argc, char* argv[])
     // Waiting does not have perfect accuracy
     // However, it is guaranteed to wait at least the amount of time specified
     // On average, waiting for 1000 milliseconds yields 1020 milliseconds so 1100 is a HIGH upper bound
-    BE_REQUIRES_TEST(1000 < TimeWaited && TimeWaited < 1100)
+    BE_REQUIRES_TEST_REPORT_FAILED_VALUE(1000 < TimeWaited && TimeWaited < 1100, TimeWaited)
     BE_CHECK_TEST(1000 < TimeWaited && TimeWaited < 1030)
     // Time
     // Allocation / Deallocation

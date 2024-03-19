@@ -3,6 +3,14 @@
 // All definitions in BETypeTraits.h will be moved into appropriate files / folders when ready
 
 #ifdef _WIN32
+#define WINDOWS 1
+#define LINUX 0
+#else
+#define WINDOWS 0
+#define LINUX 1
+#endif
+
+#ifdef _WIN32
 #include <intrin.h>
 // __nop needed for Windows compiler to stop at correct debug location
 #define NOP __nop();
@@ -15,6 +23,10 @@
 #define PLATFORM_BREAK_RET(x, ret) PLATFORM_BREAK_ return ret;
 #define PLATFORM_BREAK_NO_RET(x) PLATFORM_BREAK_
 #define PLATFORM_BREAK(x) PLATFORM_BREAK_RET(x,)
+
+// Helper macros to emphasise private namespaces that should not be accessed from any other files
+#define PRIVATE_NAMESPACE(x) x##_Private
+#define PRIVATE_NAMESPACE_DEFINE(x) namespace PRIVATE_NAMESPACE(x)
 
 /* Naming Conventions
  * - BE for BE-specific Objects

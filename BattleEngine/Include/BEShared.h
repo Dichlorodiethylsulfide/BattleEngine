@@ -32,7 +32,8 @@ public:
     }
     bool RemoveRef() const
     {
-        return --StrongRefCount == 0;
+        --StrongRefCount;
+        return StrongRefCount == 0;
     }
     bool IsUnique() const
     {

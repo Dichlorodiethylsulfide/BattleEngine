@@ -24,11 +24,11 @@ enum BEIOColourCode
 class BEIOColorOutputModifier {
     BEIOColourCode m_Code;
 public:
-    BEIOColorOutputModifier(BEIOColourCode pCode) : code(pCode) {}
+    BEIOColorOutputModifier(BEIOColourCode pCode) : m_Code(pCode) {}
     
     friend std::ostream&
     operator<<(std::ostream& os, const BEIOColorOutputModifier& mod)
     {
-        return os << "\033[" << mod.code << "m";
+        return os << "\033[" << mod.m_Code << "m";
     }
 };

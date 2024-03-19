@@ -309,6 +309,7 @@
       <AdditionalIncludeDirectories>C:\git\BattleEngine\BattleEngine/Include</AdditionalIncludeDirectories>
       <LibCompiled>true</LibCompiled>
     </ClCompile>
+    <ClCompile Include="Source\BEAtomic.cpp" />
     <ClCompile Include="Source\BEConsoleIO.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
