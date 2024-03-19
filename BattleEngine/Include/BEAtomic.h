@@ -31,12 +31,6 @@ PRIVATE_NAMESPACE_DEFINE(BEAtomic)
     bool AtomicInterlockedCompare(AtomicAddress ContentsAddress, AtomicAddress ExpectedAddress, SizeType Bytes);
 
     template<class TType>
-    BE_FORCEINLINE bool AtomicCompare(VOLATILE TType* ContentsAddress, VOLATILE TType* ExpectedAddress)
-    {
-        return AtomicInterlockedCompare(static_cast<AtomicAddress>(ContentsAddress), static_cast<AtomicAddress>(ExpectedAddress), sizeof(TType));
-    }
-
-    template<class TType>
     BE_FORCEINLINE AtomicAddress GetAtomicAddress(TType& Source) noexcept
     {
         return &reinterpret_cast<AtomicRef>(Source);
@@ -46,6 +40,12 @@ PRIVATE_NAMESPACE_DEFINE(BEAtomic)
     BE_FORCEINLINE AtomicAddress GetAtomicAddress(const TType& Source) noexcept
     {
         return &reinterpret_cast<const AtomicRef>(Source);
+    }
+    
+    template<class TType>
+    BE_FORCEINLINE bool AtomicCompare(VOLATILE TType* ContentsAddress, VOLATILE TType* ExpectedAddress)
+    {
+        return AtomicInterlockedCompare(GetAtomicAddress(ContentsAddress), GetAtomicAddress(ExpectedAddress), sizeof(TType));
     }
 } // BEAtomic_Private
 

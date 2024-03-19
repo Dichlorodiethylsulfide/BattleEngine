@@ -131,39 +131,38 @@ size_t PRIVATE_NAMESPACE(BEAtomic)::AtomicInterlockedSub(AtomicAddress Address, 
 
 bool PRIVATE_NAMESPACE(BEAtomic)::AtomicInterlockedCompare(AtomicAddress ContentsAddress, AtomicAddress ExpectedAddress, size_t Bytes)
 {
+    // TODO: malloc and free being used here from cstdlib
     // Very slow but very strong comparison
     // Enforcing this operation means the result is slower but it is guaranteed
     // because the contents are first copied byte-for-byte
-    bool success = true;
-    char* contentBytePtr;
-    char* expectedBytePtr;
-    void* contentBytes = malloc(Bytes);
-    memcpy(contentBytes, (void*)ContentsAddress, Bytes);
-    void* expectedBytes = malloc(Bytes);
-    memcpy(expectedBytes, (void*)ExpectedAddress, Bytes);
-    contentBytePtr = (char*)contentBytes;
-    expectedBytePtr = (char*)expectedBytes;
+    const auto& Allocator = GetAllocator();
+    void* ContentBytes = Allocator.Malloc(Bytes);
+    memcpy(ContentBytes, (void*)ContentsAddress, Bytes);
+    void* ExpectedBytes = Allocator.Malloc(Bytes);
+    memcpy(ExpectedBytes, (void*)ExpectedAddress, Bytes);
+    char* ContentBytePtr = (char*)ContentBytes;
+    char* ExpectedBytePtr = (char*)ExpectedBytes;
     for(size_t i = 0; i < Bytes; i++)
     {
-        char discardByte = *(contentBytePtr + i);
-        char discardValue = discardByte != 1 ? 1 : 0;
+        char DiscardByte = *(ContentBytePtr + i);
+        char DiscardValue = DiscardByte != 1 ? 1 : 0;
 #if WINDOWS
-        InterlockedCompareExchange8(&discardByte, discardValue, *(expectedBytePtr + i));
+        InterlockedCompareExchange8(&DiscardByte, DiscardValue, *(ExpectedBytePtr + i));
 #else
         // need to verify with the gnu docs
         //InterlockedCompareExchange8(&discardByte, (void*)&discardValue, *(expectedBytePtr + i));
         InterlockedCompareExchange8(&discardByte, (void*)(expectedBytePtr + i), discardValue);
 #endif
-        if(discardByte != discardValue)
+        if(DiscardByte != DiscardValue)
         {
-            free((void*)contentBytePtr);
-            free((void*)expectedBytePtr);
+            Allocator.Free(ContentBytePtr);
+            Allocator.Free(ExpectedBytePtr);
             return false;
         }
     }
-    free((void*)contentBytePtr);
-    free((void*)expectedBytePtr);
-    return success;
+    Allocator.Free(ContentBytePtr);
+    Allocator.Free(ExpectedBytePtr);
+    return true;
 }
 
 SMutex::SMutex()

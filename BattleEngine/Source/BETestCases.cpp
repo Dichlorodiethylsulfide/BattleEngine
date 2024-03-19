@@ -79,6 +79,8 @@ int main(int argc, char* argv[])
     Thread.join();
     ABoolean.ExitCriticalSection();
     BE_REQUIRES_TEST(!ABoolean)
+    BE_REQUIRES_TEST(ABoolean.CompareWeak(false))
+    BE_REQUIRES_TEST(!ABoolean.CompareStrong(true))
     // Atomic
     // Time
     const auto Now = BETime::Now();
