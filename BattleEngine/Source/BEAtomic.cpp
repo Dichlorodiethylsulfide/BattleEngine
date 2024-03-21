@@ -5,15 +5,15 @@
 #if WINDOWS
 #include <intrin0.h>
 #include <xthreads.h>
-#define InterlockedAdd8(Address, operand) (::_InterlockedExchangeAdd8((volatile char*)(Address), operand))
-#define InterlockedAdd16(Address, operand) (::_InterlockedExchangeAdd16((volatile short*)(Address), operand))
-#define InterlockedAdd32(Address, operand) (::_InterlockedExchangeAdd((volatile long*)(Address), operand))
-#define InterlockedAdd64(Address, operand) (::_InterlockedExchangeAdd64((volatile long long*)(Address), operand))
+#define InterlockedAdd8(Address, operand) (::_InterlockedExchangeAdd8((VOLATILE char*)(Address), operand))
+#define InterlockedAdd16(Address, operand) (::_InterlockedExchangeAdd16((VOLATILE short*)(Address), operand))
+#define InterlockedAdd32(Address, operand) (::_InterlockedExchangeAdd((VOLATILE long*)(Address), operand))
+#define InterlockedAdd64(Address, operand) (::_InterlockedExchangeAdd64((VOLATILE long long*)(Address), operand))
 
-#define InterlockedSub8(Address, operand) (::_InterlockedExchangeAdd8((volatile char*)(Address), operand))
-#define InterlockedSub16(Address, operand) (::_InterlockedExchangeAdd16((volatile short*)(Address), operand))
-#define InterlockedSub32(Address, operand) (::_InterlockedExchangeAdd((volatile long*)(Address), operand))
-#define InterlockedSub64(Address, operand) (::_InterlockedExchangeAdd64((volatile long long*)(Address), operand))
+#define InterlockedSub8(Address, operand) (::_InterlockedExchangeAdd8((VOLATILE char*)(Address), operand))
+#define InterlockedSub16(Address, operand) (::_InterlockedExchangeAdd16((VOLATILE short*)(Address), operand))
+#define InterlockedSub32(Address, operand) (::_InterlockedExchangeAdd((VOLATILE long*)(Address), operand))
+#define InterlockedSub64(Address, operand) (::_InterlockedExchangeAdd64((VOLATILE long long*)(Address), operand))
 
 #define InterlockedCompareExchange8(Address, target, value) (::_InterlockedCompareExchange8((char*)(Address), (target), (char)(value)))
 #define InterlockedExchange8(Address, value) (::_InterlockedExchange8((char*)(Address), (char)(value)))

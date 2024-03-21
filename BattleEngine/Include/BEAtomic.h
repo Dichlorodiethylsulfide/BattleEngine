@@ -16,8 +16,10 @@
 #include <mutex>
 template<typename T>
 using TAtomic = std::atomic<T>;
+using SAtomicBool = std::atomic_bool;
 using SMutex = std::mutex;
 using SCondVar = std::condition_variable;
+using SUniqueLock = std::unique_lock;
 #else
 
 using AtomicAddress = VOLATILE Int32*;
@@ -29,7 +31,7 @@ PRIVATE_NAMESPACE_DEFINE(BEAtomic)
     SizeType AtomicInterlockedAdd(AtomicAddress Address, SizeType Bytes, SizeType Operand);
     SizeType AtomicInterlockedSub(AtomicAddress Address, SizeType Bytes, SizeType Operand);
     bool AtomicInterlockedCompare(AtomicAddress ContentsAddress, AtomicAddress ExpectedAddress, SizeType Bytes);
-
+    
     template<class TType>
     BE_FORCEINLINE AtomicAddress GetAtomicAddress(TType& Source) noexcept
     {
@@ -47,6 +49,7 @@ PRIVATE_NAMESPACE_DEFINE(BEAtomic)
     {
         return AtomicInterlockedCompare(GetAtomicAddress(ContentsAddress), GetAtomicAddress(ExpectedAddress), sizeof(TType));
     }
+    
 } // BEAtomic_Private
 
 enum class EAtomicStateEnum : UInt8
@@ -332,19 +335,39 @@ public:
 template<class TType>
 class SAtomicIntegral final : public SAtomicFacade<TType>
 {
-    BE_T_ASSERT("Integral type only, except bool", TIsArithmeticV<TType> && !TIsSameV<TType, bool>)
+    BE_T_ASSERT("Integral type only, except bool", TIsArithmeticV<TType> && !TIsBoolV<TType>)
 public:
     using Base = SAtomicFacade<TType>;
     using TValue = typename Base::TValue;
 
     SAtomicIntegral() : Base({}) {}
     SAtomicIntegral(TValue Value) : Base(Value) {}
+    
+    TValue FetchAdd(SizeType Operand)
+    {
+        if(Base::IsThisThreadCritical())
+        {
+            // TODO: check this
+            return BEAtomic_Private::AtomicInterlockedAdd(BEAtomic_Private::GetAtomicAddress(Base::m_LockedValue), sizeof(TValue), Operand);
+        }
+        return {};
+    }
+
+    TValue FetchSub(SizeType Operand)
+    {
+        if(Base::IsThisThreadCritical())
+        {
+            // TODO: check this
+            return BEAtomic_Private::AtomicInterlockedSub(BEAtomic_Private::GetAtomicAddress(Base::m_LockedValue), sizeof(TValue), Operand);
+        }
+        return {};
+    }
 
     TValue operator-=(TValue Value)
     {
         if(Base::IsThisThreadCritical())
         {
-            return BEAtomic_Private::AtomicInterlockedSub(BEAtomic_Private::GetAtomicAddress(Base::m_LockedValue), sizeof(TType), Value);
+            return FetchSub(1);
         }
         return {};
     }
@@ -353,7 +376,7 @@ public:
     {
         if(Base::IsThisThreadCritical())
         {
-            return BEAtomic_Private::AtomicInterlockedAdd(BEAtomic_Private::GetAtomicAddress(Base::m_LockedValue), sizeof(TType), Value);
+            return FetchAdd(1);
         }
         return {};
     }
@@ -362,7 +385,7 @@ public:
     {
         if(Base::IsThisThreadCritical())
         {
-            return BEAtomic_Private::AtomicInterlockedAdd(BEAtomic_Private::GetAtomicAddress(Base::m_LockedValue), sizeof(TType), 1);
+            return FetchAdd(1);
         }
         return {};
     }
@@ -371,7 +394,7 @@ public:
     {
         if(Base::IsThisThreadCritical())
         {
-            TValue Local = BEAtomic_Private::AtomicInterlockedAdd(BEAtomic_Private::GetAtomicAddress(Base::m_LockedValue), sizeof(TType), 1);
+            TValue Local = FetchAdd(1);
             --Local;
             return Local;
         }
@@ -382,7 +405,7 @@ public:
     {
         if(Base::IsThisThreadCritical())
         {
-            return BEAtomic_Private::AtomicInterlockedSub(BEAtomic_Private::GetAtomicAddress(Base::m_LockedValue), sizeof(TType), 1);
+            return FetchSub(1);
         }
         return {};
     }
@@ -391,7 +414,7 @@ public:
     {
         if(Base::IsThisThreadCritical())
         {
-            TValue Local = BEAtomic_Private::AtomicInterlockedSub(BEAtomic_Private::GetAtomicAddress(Base::m_LockedValue), sizeof(TType), 1);
+            TValue Local = FetchSub(1);
             ++Local;
             return Local;
         }
@@ -436,13 +459,12 @@ public:
     SAtomicPointer() : Base(nullptr) {}
     SAtomicPointer(TValuePtr Value) : Base(Value) {}
 
-    // TODO: FetchAdd and FetchSub should be implemented on integrals too?
     TValuePtr FetchAdd(SizeType Operand)
     {
         if(Base::IsThisThreadCritical())
         {
             // TODO: check this
-            return static_cast<TValuePtr>(BEAtomic_Private::AtomicInterlockedAdd(BEAtomic_Private::GetAtomicAddress(Base::m_LockedValue), sizeof(TValuePtr), Operand * sizeof(TValue)));
+            return reinterpret_cast<TValuePtr>(BEAtomic_Private::AtomicInterlockedAdd(BEAtomic_Private::GetAtomicAddress(Base::m_LockedValue), sizeof(TValuePtr), Operand * sizeof(TValue)));
         }
         return {};
     }
@@ -452,7 +474,7 @@ public:
         if(Base::IsThisThreadCritical())
         {
             // TODO: check this
-            return static_cast<TValuePtr>(BEAtomic_Private::AtomicInterlockedSub(BEAtomic_Private::GetAtomicAddress(Base::m_LockedValue), sizeof(TValuePtr), Operand * sizeof(TValue)));
+            return reinterpret_cast<TValuePtr>(BEAtomic_Private::AtomicInterlockedSub(BEAtomic_Private::GetAtomicAddress(Base::m_LockedValue), sizeof(TValuePtr), Operand * sizeof(TValue)));
         }
         return {};
     }
@@ -464,9 +486,9 @@ public:
         
     TValuePtr operator++(int)
     {
-        TValuePtr _Local = FetchAdd(1);
-        --_Local;
-        return _Local;
+        TValuePtr Local = FetchAdd(1);
+        --Local;
+        return Local;
     }
 
     TValuePtr operator--()
@@ -476,9 +498,9 @@ public:
         
     TValuePtr operator--(int)
     {
-        TValuePtr _Local = FetchSub(1);
-        ++_Local;
-        return _Local;
+        TValuePtr Local = FetchSub(1);
+        ++Local;
+        return Local;
     }
 };
 
