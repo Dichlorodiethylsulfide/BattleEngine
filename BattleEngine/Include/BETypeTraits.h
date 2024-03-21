@@ -514,6 +514,9 @@ BE_T_DEFINE_TRAIT_VALUES(TIsBool)
 
 template<typename TA, typename TB>
 constexpr bool TIsSameV = TIsSame<TA, TB>::Value;
+
+template<bool Check, typename TA, typename TB>
+using TChooseTypeT = typename TChooseType<Check, TA, TB>::Type;
 //
 // Function definitions
 //

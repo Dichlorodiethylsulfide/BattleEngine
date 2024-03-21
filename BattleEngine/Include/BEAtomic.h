@@ -483,9 +483,9 @@ public:
 };
 
 template<class TType>
-using TAtomic = typename TChooseType<TIsBoolV<TType>, SAtomicBool,
-                typename TChooseType<TIsArithmeticV<TType>, SAtomicIntegral<TType>,
-                typename TChooseType<TIsPointerV<TType>, SAtomicPointer<TType>,
-                SAtomicFacade<TType>>::Type>::Type>::Type;
+using TAtomic = TChooseTypeT<TIsBoolV<TType>, SAtomicBool,
+                TChooseTypeT<TIsArithmeticV<TType>, SAtomicIntegral<TType>,
+                TChooseTypeT<TIsPointerV<TType>, SAtomicPointer<TType>,
+                SAtomicFacade<TType>>>>;
 
 #endif
