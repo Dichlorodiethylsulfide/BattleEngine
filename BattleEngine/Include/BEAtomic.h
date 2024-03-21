@@ -311,7 +311,7 @@ public:
 
     virtual operator TType() const
     {
-        return m_LockedValue;
+        return Load();
     }
 
 protected:
@@ -419,7 +419,7 @@ public:
         return false;
     }
 
-    explicit operator bool() const
+    explicit operator bool() const override
     {
         return Load();
     }
@@ -442,7 +442,7 @@ public:
         if(Base::IsThisThreadCritical())
         {
             // TODO: check this
-            return BEAtomic_Private::AtomicInterlockedAdd(BEAtomic_Private::GetAtomicAddress(Base::m_LockedValue), sizeof(TValuePtr), Operand);
+            return static_cast<TValuePtr>(BEAtomic_Private::AtomicInterlockedAdd(BEAtomic_Private::GetAtomicAddress(Base::m_LockedValue), sizeof(TValuePtr), Operand * sizeof(TValue)));
         }
         return {};
     }
@@ -452,7 +452,7 @@ public:
         if(Base::IsThisThreadCritical())
         {
             // TODO: check this
-            return BEAtomic_Private::AtomicInterlockedSub(BEAtomic_Private::GetAtomicAddress(Base::m_LockedValue), sizeof(TValuePtr), Operand);
+            return static_cast<TValuePtr>(BEAtomic_Private::AtomicInterlockedSub(BEAtomic_Private::GetAtomicAddress(Base::m_LockedValue), sizeof(TValuePtr), Operand * sizeof(TValue)));
         }
         return {};
     }
@@ -464,7 +464,7 @@ public:
         
     TValuePtr operator++(int)
     {
-        TValue _Local = FetchAdd(1);
+        TValuePtr _Local = FetchAdd(1);
         --_Local;
         return _Local;
     }
@@ -476,7 +476,7 @@ public:
         
     TValuePtr operator--(int)
     {
-        TValue _Local = FetchSub(1);
+        TValuePtr _Local = FetchSub(1);
         ++_Local;
         return _Local;
     }
@@ -485,7 +485,7 @@ public:
 template<class TType>
 using TAtomic = TChooseTypeT<TIsBoolV<TType>, SAtomicBool,
                 TChooseTypeT<TIsArithmeticV<TType>, SAtomicIntegral<TType>,
-                TChooseTypeT<TIsPointerV<TType>, SAtomicPointer<TType>,
+                TChooseTypeT<TIsPointerV<TType>, SAtomicPointer<TRemovePointerT<TType>>,
                 SAtomicFacade<TType>>>>;
 
 #endif

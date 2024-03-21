@@ -81,6 +81,16 @@ int main(int argc, char* argv[])
     BE_REQUIRES_TEST(!ABoolean)
     BE_REQUIRES_TEST(ABoolean.CompareWeak(false))
     BE_REQUIRES_TEST(!ABoolean.CompareStrong(true))
+    TAtomic<int*> AtomicPtr = nullptr;
+    ++AtomicPtr;
+    BE_REQUIRES_TEST(AtomicPtr.Load() == reinterpret_cast<int*>(1 * sizeof(int)))
+    --AtomicPtr;
+    BE_REQUIRES_TEST(AtomicPtr.Load() == nullptr)
+    TAtomic<int> AtomicInt = 0;
+    ++AtomicInt;
+    BE_REQUIRES_TEST(AtomicInt.Load() == 1)
+    --AtomicInt;
+    BE_REQUIRES_TEST(AtomicInt.Load() == 0)
     // Atomic
     // Time
     const auto Now = BETime::Now();
