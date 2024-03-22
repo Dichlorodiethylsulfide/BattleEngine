@@ -1,15 +1,8 @@
 ﻿#pragma once
 
+#include "BEThread.h"
 #include "BETime.h"
 #include "BETypeTraits.h"
-
-// Clear macro to test atomic code
-#if defined(BE_USE_STD_ATOMICS)
-#undef BE_USE_STD_ATOMICS
-#define BE_USE_STD_ATOMICS 0
-#else
-#define BE_USE_STD_ATOMICS 0
-#endif
 
 #if BE_USE_STD_ATOMICS
 #include <atomic>
@@ -27,7 +20,6 @@ using AtomicRef = VOLATILE Int32&;
 
 PRIVATE_NAMESPACE_DEFINE(BEAtomic)
 {
-    Int32 GetThreadID();
     SizeType AtomicInterlockedAdd(AtomicAddress Address, SizeType Bytes, SizeType Operand);
     SizeType AtomicInterlockedSub(AtomicAddress Address, SizeType Bytes, SizeType Operand);
     bool AtomicInterlockedCompare(AtomicAddress ContentsAddress, AtomicAddress ExpectedAddress, SizeType Bytes);
@@ -188,7 +180,7 @@ public:
     {
         SSpinLockGuard Guard { m_SpinLock };
         {
-            CriticalThreadHandle = BEAtomic_Private::GetThreadID();
+            CriticalThreadHandle = ThisThread::GetThreadID();
             bIsInCriticalSection = true;
         }
     }
@@ -212,7 +204,7 @@ public:
 
     bool IsThisThreadCritical() const
     {
-        return IsThreadCritical(BEAtomic_Private::GetThreadID());
+        return IsThreadCritical(ThisThread::GetThreadID());
     }
 
     bool IsThreadCritical(Int32 ThreadID) const

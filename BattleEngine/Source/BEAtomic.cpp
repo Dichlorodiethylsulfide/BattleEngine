@@ -114,11 +114,6 @@ INTERLOCK_INTERNAL_FUNCTIONS(Sub, 64)
 typedef SizeType (*AddFunction)(AtomicAddress, size_t);
 typedef SizeType (*SubFunction)(AtomicAddress, size_t);
 
-Int32 PRIVATE_NAMESPACE(BEAtomic)::GetThreadID()
-{
-    return GET_THREAD_ID;
-}
-
 size_t PRIVATE_NAMESPACE(BEAtomic)::AtomicInterlockedAdd(AtomicAddress Address, size_t Bytes, size_t Operand)
 {
     INTERLOCK_FUNCTION_BODY(Add, Operand);
